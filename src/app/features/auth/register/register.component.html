@@ -1,0 +1,425 @@
+<div class="min-h-screen bg-gradient-to-br from-blue-50 to-gray-100 py-12 px-4 sm:px-6 lg:px-8">
+  <div class="max-w-4xl mx-auto">
+    <!-- Header -->
+    <div class="text-center mb-8">
+      <div class="inline-flex items-center justify-center h-12 w-12 bg-blue-600 rounded-full mb-4">
+        <span class="text-white text-xl font-bold">B</span>
+      </div>
+      <h1 class="text-3xl font-bold text-gray-900">Create Your SecureBank Account</h1>
+      <p class="mt-2 text-gray-600">
+        Join thousands of satisfied customers and enjoy secure banking
+      </p>
+    </div>
+
+    <!-- Demo Data Button -->
+    <div class="mb-6 text-center">
+      <button
+        (click)="fillDemoData()"
+        class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-blue-700 bg-blue-100 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+      >
+        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+        </svg>
+        Fill with Demo Data
+      </button>
+    </div>
+
+    <!-- Registration Form -->
+    <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+      <div class="p-8">
+        @if (isLoading()) {
+          <div class="text-center py-12">
+            <app-loading-spinner message="Creating your account..." />
+          </div>
+        } @else {
+          <form (ngSubmit)="onSubmit()" #registerForm="ngForm" class="space-y-6">
+            @if (errorMessage()) {
+              <div class="rounded-lg bg-red-50 border border-red-200 p-4">
+                <div class="flex">
+                  <div class="flex-shrink-0">
+                    <svg class="h-5 w-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                  </div>
+                  <div class="ml-3">
+                    <p class="text-sm font-medium text-red-800">{{ errorMessage() }}</p>
+                  </div>
+                </div>
+              </div>
+            }
+
+            <!-- Account Information -->
+            <div class="border-b border-gray-200 pb-6">
+              <h3 class="text-lg font-medium text-gray-900 mb-4">Account Information</h3>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Username -->
+                <div>
+                  <label for="username" class="block text-sm font-medium text-gray-700 mb-1">
+                    Username *
+                  </label>
+                  <input
+                    id="username"
+                    name="username"
+                    type="text"
+                    required
+                    [(ngModel)]="userData().username"
+                    class="input-field"
+                    placeholder="Choose a username"
+                  />
+                  <p class="mt-1 text-xs text-gray-500">Must be unique</p>
+                </div>
+
+                <!-- Email -->
+                <div>
+                  <label for="email" class="block text-sm font-medium text-gray-700 mb-1">
+                    Email Address *
+                  </label>
+                  <input
+                    id="email"
+                    name="email"
+                    type="email"
+                    required
+                    [(ngModel)]="userData().email"
+                    class="input-field"
+                    placeholder="your.email@example.com"
+                  />
+                </div>
+
+                <!-- Password -->
+                <div>
+                  <label for="password" class="block text-sm font-medium text-gray-700 mb-1">
+                    Password *
+                  </label>
+                  <div class="relative">
+                    <input
+                      id="password"
+                      name="password"
+                      [type]="showPassword() ? 'text' : 'password'"
+                      required
+                      [(ngModel)]="userData().password"
+                      (input)="onPasswordChange()"
+                      class="input-field pr-10"
+                      placeholder="Create a strong password"
+                    />
+                    <button
+                      type="button"
+                      (click)="togglePasswordVisibility()"
+                      class="absolute inset-y-0 right-0 pr-3 flex items-center"
+                    >
+                      @if (showPassword()) {
+                        <svg class="h-5 w-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L6.59 6.59m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path>
+                        </svg>
+                      } @else {
+                        <svg class="h-5 w-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                        </svg>
+                      }
+                    </button>
+                  </div>
+
+                  <!-- Password Strength Indicator -->
+                  @if (userData().password) {
+                    <div class="mt-2">
+                      <div class="flex items-center justify-between mb-1">
+                        <span class="text-xs font-medium text-gray-700">Password strength:</span>
+                        <span class="text-xs font-medium" [class]="getPasswordStrengthColor().replace('bg-', 'text-')">
+                          {{ getPasswordStrengthText() }}
+                        </span>
+                      </div>
+                      <div class="h-2 bg-gray-200 rounded-full overflow-hidden">
+                        <div 
+                          class="h-full transition-all duration-300"
+                          [class]="getPasswordStrengthColor()"
+                          [style.width]="(passwordStrength() * 20) + '%'"
+                        ></div>
+                      </div>
+                      
+                      <!-- Password Requirements -->
+                      <div class="mt-2 grid grid-cols-2 gap-1">
+                        @for (req of passwordRequirements() | keyvalue; track req.key) {
+                          <div class="flex items-center text-xs">
+                            @if (req.value) {
+                              <svg class="h-3 w-3 text-green-500 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                              </svg>
+                              <span class="text-green-600">
+                                @switch (req.key) {
+                                  @case ('length') { At least 8 characters }
+                                  @case ('uppercase') { Uppercase letter }
+                                  @case ('lowercase') { Lowercase letter }
+                                  @case ('number') { Number }
+                                  @case ('special') { Special character }
+                                }
+                              </span>
+                            } @else {
+                              <svg class="h-3 w-3 text-gray-300 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                              </svg>
+                              <span class="text-gray-500">
+                                @switch (req.key) {
+                                  @case ('length') { At least 8 characters }
+                                  @case ('uppercase') { Uppercase letter }
+                                  @case ('lowercase') { Lowercase letter }
+                                  @case ('number') { Number }
+                                  @case ('special') { Special character }
+                                }
+                              </span>
+                            }
+                          </div>
+                        }
+                      </div>
+                    </div>
+                  }
+                </div>
+
+                <!-- Confirm Password -->
+                <div>
+                  <label for="confirmPassword" class="block text-sm font-medium text-gray-700 mb-1">
+                    Confirm Password *
+                  </label>
+                  <div class="relative">
+                    <input
+                      id="confirmPassword"
+                      name="confirmPassword"
+                      [type]="showConfirmPassword() ? 'text' : 'password'"
+                      required
+                      [(ngModel)]="userData().confirmPassword"
+                      class="input-field pr-10"
+                      placeholder="Confirm your password"
+                    />
+                    <button
+                      type="button"
+                      (click)="toggleConfirmPasswordVisibility()"
+                      class="absolute inset-y-0 right-0 pr-3 flex items-center"
+                    >
+                      @if (showConfirmPassword()) {
+                        <svg class="h-5 w-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L6.59 6.59m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path>
+                        </svg>
+                      } @else {
+                        <svg class="h-5 w-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                        </svg>
+                      }
+                    </button>
+                  </div>
+                  @if (userData().password && userData().confirmPassword && userData().password !== userData().confirmPassword) {
+                    <p class="mt-1 text-xs text-red-600">Passwords do not match</p>
+                  }
+                </div>
+              </div>
+            </div>
+
+            <!-- Personal Information -->
+            <div class="border-b border-gray-200 pb-6">
+              <h3 class="text-lg font-medium text-gray-900 mb-4">Personal Information</h3>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- First Name -->
+                <div>
+                  <label for="firstName" class="block text-sm font-medium text-gray-700 mb-1">
+                    First Name *
+                  </label>
+                  <input
+                    id="firstName"
+                    name="firstName"
+                    type="text"
+                    required
+                    [(ngModel)]="userData().firstName"
+                    class="input-field"
+                    placeholder="John"
+                  />
+                </div>
+
+                <!-- Last Name -->
+                <div>
+                  <label for="lastName" class="block text-sm font-medium text-gray-700 mb-1">
+                    Last Name *
+                  </label>
+                  <input
+                    id="lastName"
+                    name="lastName"
+                    type="text"
+                    required
+                    [(ngModel)]="userData().lastName"
+                    class="input-field"
+                    placeholder="Doe"
+                  />
+                </div>
+
+                <!-- Phone Number -->
+                <div>
+                  <label for="phoneNumber" class="block text-sm font-medium text-gray-700 mb-1">
+                    Phone Number *
+                  </label>
+                  <input
+                    id="phoneNumber"
+                    name="phoneNumber"
+                    type="tel"
+                    required
+                    [(ngModel)]="userData().phoneNumber"
+                    class="input-field"
+                    placeholder="555-123-4567"
+                  />
+                  <p class="mt-1 text-xs text-gray-500">Format: 123-456-7890</p>
+                </div>
+
+                <!-- Date of Birth -->
+                <div>
+                  <label for="dateOfBirth" class="block text-sm font-medium text-gray-700 mb-1">
+                    Date of Birth *
+                  </label>
+                  <input
+                    id="dateOfBirth"
+                    name="dateOfBirth"
+                    type="date"
+                    required
+                    [(ngModel)]="userData().dateOfBirth"
+                    class="input-field"
+                  />
+                  <p class="mt-1 text-xs text-gray-500">Must be 18 years or older</p>
+                </div>
+
+                <!-- SSN -->
+                <div>
+                  <label for="ssn" class="block text-sm font-medium text-gray-700 mb-1">
+                    Social Security Number *
+                  </label>
+                  <input
+                    id="ssn"
+                    name="ssn"
+                    type="text"
+                    required
+                    [(ngModel)]="userData().ssn"
+                    class="input-field"
+                    placeholder="123-45-6789"
+                  />
+                  <p class="mt-1 text-xs text-gray-500">Format: XXX-XX-XXXX</p>
+                </div>
+
+                <!-- State -->
+                <div>
+                  <label for="state" class="block text-sm font-medium text-gray-700 mb-1">
+                    State *
+                  </label>
+                  <select
+                    id="state"
+                    name="state"
+                    required
+                    [(ngModel)]="userData().state"
+                    class="select-field"
+                  >
+                    <option value="">Select a state</option>
+                    @for (state of states; track state) {
+                      <option [value]="state">{{ state }}</option>
+                    }
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- Address Information -->
+            <div class="pb-6">
+              <h3 class="text-lg font-medium text-gray-900 mb-4">Address Information</h3>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Address -->
+                <div class="md:col-span-2">
+                  <label for="address" class="block text-sm font-medium text-gray-700 mb-1">
+                    Street Address *
+                  </label>
+                  <input
+                    id="address"
+                    name="address"
+                    type="text"
+                    required
+                    [(ngModel)]="userData().address"
+                    class="input-field"
+                    placeholder="123 Main Street"
+                  />
+                </div>
+
+                <!-- City -->
+                <div>
+                  <label for="city" class="block text-sm font-medium text-gray-700 mb-1">
+                    City *
+                  </label>
+                  <input
+                    id="city"
+                    name="city"
+                    type="text"
+                    required
+                    [(ngModel)]="userData().city"
+                    class="input-field"
+                    placeholder="New York"
+                  />
+                </div>
+
+                <!-- Zip Code -->
+                <div>
+                  <label for="zipCode" class="block text-sm font-medium text-gray-700 mb-1">
+                    ZIP Code *
+                  </label>
+                  <input
+                    id="zipCode"
+                    name="zipCode"
+                    type="text"
+                    required
+                    [(ngModel)]="userData().zipCode"
+                    class="input-field"
+                    placeholder="10001"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <!-- Terms and Conditions -->
+            <div class="flex items-center">
+              <input
+                id="terms"
+                name="terms"
+                type="checkbox"
+                required
+                class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+              />
+              <label for="terms" class="ml-2 block text-sm text-gray-700">
+                I agree to the 
+                <a href="#" class="text-blue-600 hover:text-blue-500">Terms of Service</a>
+                and 
+                <a href="#" class="text-blue-600 hover:text-blue-500">Privacy Policy</a>
+              </label>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="pt-6">
+              <button
+                type="submit"
+                [disabled]="isLoading()"
+                class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+              >
+                Create Account
+              </button>
+            </div>
+
+            <!-- Login Link -->
+            <div class="text-center pt-4">
+              <p class="text-sm text-gray-600">
+                Already have an account?
+                <a routerLink="/login" class="font-medium text-blue-600 hover:text-blue-500">
+                  Sign in here
+                </a>
+              </p>
+            </div>
+          </form>
+        }
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="mt-8 text-center text-sm text-gray-500">
+      <p>© 2024 SecureBank. Member FDIC. All deposits insured up to $250,000.</p>
+      <p class="mt-1">By creating an account, you agree to our terms and conditions.</p>
+    </div>
+  </div>
+</div>

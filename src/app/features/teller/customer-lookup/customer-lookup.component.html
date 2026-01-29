@@ -1,0 +1,339 @@
+<app-dashboard-layout
+  title="Customer Lookup"
+  subtitle="Find and manage customer information"
+  [breadcrumbItems]="[
+    { label: 'Teller Dashboard', link: '/teller/dashboard' },
+    { label: 'Customer Lookup' }
+  ]"
+>
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- Left Column: Search -->
+    <div class="lg:col-span-2">
+      <!-- Search Section -->
+      <div class="card mb-6">
+        <h3 class="text-lg font-medium text-gray-900 mb-4">Search Customers</h3>
+        
+        <div class="space-y-4">
+          <!-- Search Type and Query -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Search By</label>
+              <select 
+                [(ngModel)]="searchType()"
+                class="select-field"
+              >
+                @for (type of searchTypes; track type.value) {
+                  <option [value]="type.value">{{ type.label }}</option>
+                }
+              </select>
+            </div>
+            
+            <div class="md:col-span-2">
+              <label class="block text-sm font-medium text-gray-700 mb-1">Search Query</label>
+              <div class="flex">
+                <input
+                  type="text"
+                  [(ngModel)]="searchQuery()"
+                  (input)="searchCustomers()"
+                  class="input-field rounded-r-none"
+                  placeholder="Enter search term..."
+                />
+                <button
+                  (click)="searchCustomers()"
+                  [disabled]="isLoading()"
+                  class="px-4 py-2 bg-blue-600 text-white rounded-r-lg hover:bg-blue-700 disabled:opacity-50"
+                >
+                  @if (isLoading()) {
+                    <svg class="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                  } @else {
+                    Search
+                  }
+                </button>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Quick Search Tips -->
+          <div class="p-3 bg-blue-50 rounded-lg">
+            <p class="text-sm text-blue-800">
+              <span class="font-medium">Search Tips:</span> 
+              Use Customer ID for exact matches, names for partial matches, 
+              or account numbers to find account holders.
+            </p>
+          </div>
+          
+          <button
+            (click)="clearSearch()"
+            class="text-sm text-blue-600 hover:text-blue-500"
+          >
+            Clear Search
+          </button>
+        </div>
+      </div>
+
+      <!-- Search Results -->
+      <div class="card">
+        <div class="flex items-center justify-between mb-6">
+          <div>
+            <h3 class="text-lg font-medium text-gray-900">Search Results</h3>
+            <p class="text-sm text-gray-500">
+              Found {{ filteredCustomers().length }} customers
+            </p>
+          </div>
+          <div class="text-sm text-gray-600">
+            Showing {{ Math.min(filteredCustomers().length, 20) }} of {{ filteredCustomers().length }}
+          </div>
+        </div>
+        
+        @if (isLoading()) {
+          <div class="text-center py-12">
+            <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            <p class="mt-4 text-gray-600">Searching customers...</p>
+          </div>
+        } @else if (filteredCustomers().length > 0) {
+          <app-data-table
+            [columns]="customerColumns"
+            [data]="filteredCustomers().slice(0, 20)"
+            [trackBy]="'id'"
+            [actions]="['view']"
+            (onView)="selectCustomer($event)"
+          />
+        } @else {
+          <div class="text-center py-12">
+            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <h3 class="mt-2 text-sm font-medium text-gray-900">No customers found</h3>
+            <p class="mt-1 text-sm text-gray-500">
+              Try a different search term or search by a different field.
+            </p>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Right Column: Customer Details -->
+    <div class="space-y-6">
+      <!-- Selected Customer Info -->
+      @if (selectedCustomer()) {
+        <div class="card">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-medium text-gray-900">Customer Details</h3>
+            <span 
+              class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+              [ngClass]="getCustomerStatusColor(selectedCustomer()!)"
+            >
+              {{ getCustomerStatus(selectedCustomer()!) }}
+            </span>
+          </div>
+          
+          <div class="space-y-4">
+            <!-- Customer Info -->
+            <div>
+              <div class="flex items-center space-x-3 mb-4">
+                <div class="h-12 w-12 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                  {{ selectedCustomer()!.firstName.charAt(0) }}{{ selectedCustomer()!.lastName.charAt(0) }}
+                </div>
+                <div>
+                  <h4 class="font-medium text-gray-900">
+                    {{ selectedCustomer()!.firstName }} {{ selectedCustomer()!.lastName }}
+                  </h4>
+                  <p class="text-sm text-gray-600">
+                    ID: {{ selectedCustomer()!.customerId }}
+                  </p>
+                </div>
+              </div>
+              
+              <div class="grid grid-cols-1 gap-2">
+                <div class="flex justify-between">
+                  <span class="text-sm text-gray-600">Email</span>
+                  <span class="text-sm font-medium text-gray-900">
+                    {{ selectedCustomer()!.email }}
+                  </span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-sm text-gray-600">Phone</span>
+                  <span class="text-sm font-medium text-gray-900">
+                    {{ selectedCustomer()!.phoneNumber }}
+                  </span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-sm text-gray-600">Address</span>
+                  <span class="text-sm text-gray-900">
+                    {{ selectedCustomer()!.address }}
+                  </span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-sm text-gray-600">Member Since</span>
+                  <span class="text-sm text-gray-900">
+                    {{ formatDate(selectedCustomer()!.createdAt) }}
+                  </span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-sm text-gray-600">Last Login</span>
+                  <span class="text-sm text-gray-900">
+                    {{ selectedCustomer()!.lastLogin ? formatDate(selectedCustomer()!.lastLogin) : 'Never' }}
+                  </span>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Customer Summary -->
+            @if (getCustomerSummary()) {
+              <div class="pt-4 border-t border-gray-200">
+                <h4 class="font-medium text-gray-900 mb-3">Account Summary</h4>
+                <div class="grid grid-cols-2 gap-4">
+                  <div class="text-center p-3 bg-gray-50 rounded-lg">
+                    <p class="text-2xl font-bold text-gray-900">
+                      {{ formatCurrency(getCustomerSummary().totalBalance) }}
+                    </p>
+                    <p class="text-xs text-gray-600">Total Balance</p>
+                  </div>
+                  <div class="text-center p-3 bg-gray-50 rounded-lg">
+                    <p class="text-2xl font-bold text-gray-900">
+                      {{ getCustomerSummary().activeAccounts }}
+                    </p>
+                    <p class="text-xs text-gray-600">Active Accounts</p>
+                  </div>
+                </div>
+              </div>
+            }
+            
+            <!-- Quick Actions -->
+            <div class="pt-4 border-t border-gray-200">
+              <h4 class="font-medium text-gray-900 mb-3">Quick Actions</h4>
+              <div class="grid grid-cols-2 gap-2">
+                <a 
+                  [routerLink]="['/teller/transactions']"
+                  [queryParams]="{customerId: selectedCustomer()!.customerId}"
+                  class="text-center px-3 py-2 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 text-sm"
+                >
+                  New Transaction
+                </a>
+                <button class="px-3 py-2 bg-green-50 text-green-700 rounded-lg hover:bg-green-100 text-sm">
+                  View History
+                </button>
+                <button class="px-3 py-2 bg-purple-50 text-purple-700 rounded-lg hover:bg-purple-100 text-sm">
+                  Update Profile
+                </button>
+                <button class="px-3 py-2 bg-red-50 text-red-700 rounded-lg hover:bg-red-100 text-sm">
+                  Report Issue
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Customer Accounts -->
+        @if (customerAccounts().length > 0) {
+          <div class="card">
+            <h3 class="text-lg font-medium text-gray-900 mb-4">Customer Accounts</h3>
+            
+            <div class="space-y-3">
+              @for (account of customerAccounts(); track account.id) {
+                <div class="p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                  <div class="flex items-center justify-between mb-2">
+                    <div>
+                      <p class="font-medium text-gray-900">
+                        {{ account.type }} Account
+                      </p>
+                      <p class="text-sm text-gray-600">
+                        {{ account.accountNumber }}
+                      </p>
+                    </div>
+                    <div class="text-right">
+                      <p class="font-medium text-gray-900">
+                        {{ formatCurrency(account.balance) }}
+                      </p>
+                      <span 
+                        class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium"
+                        [ngClass]="getAccountStatusColor(account.status)"
+                      >
+                        {{ account.status }}
+                      </span>
+                    </div>
+                  </div>
+                  <div class="flex justify-between text-xs text-gray-500">
+                    <span>Available: {{ formatCurrency(account.availableBalance) }}</span>
+                    <span>Opened: {{ formatDate(account.openingDate) }}</span>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+        }
+      } @else {
+        <!-- No Customer Selected -->
+        <div class="card">
+          <div class="text-center py-8">
+            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+            </svg>
+            <h3 class="mt-2 text-sm font-medium text-gray-900">No customer selected</h3>
+            <p class="mt-1 text-sm text-gray-500">
+              Select a customer from the search results to view details.
+            </p>
+          </div>
+        </div>
+      }
+
+      <!-- Search Statistics -->
+      <div class="card">
+        <h3 class="text-lg font-medium text-gray-900 mb-4">Search Statistics</h3>
+        <div class="space-y-4">
+          <div>
+            <div class="flex justify-between text-sm mb-1">
+              <span class="text-gray-600">Total Customers</span>
+              <span class="font-medium text-gray-900">{{ allCustomers().length }}</span>
+            </div>
+            <div class="h-2 bg-gray-200 rounded-full overflow-hidden">
+              <div class="h-full bg-blue-500" style="width: 100%"></div>
+            </div>
+          </div>
+          
+          <div>
+            <div class="flex justify-between text-sm mb-1">
+              <span class="text-gray-600">Active Customers</span>
+              <span class="font-medium text-gray-900">
+                {{ allCustomers().filter(c => c.isActive).length }}
+              </span>
+            </div>
+            <div class="h-2 bg-gray-200 rounded-full overflow-hidden">
+              <div class="h-full bg-green-500" style="width: 85%"></div>
+            </div>
+          </div>
+          
+          <div>
+            <div class="flex justify-between text-sm mb-1">
+              <span class="text-gray-600">Average Accounts per Customer</span>
+              <span class="font-medium text-gray-900">2.3</span>
+            </div>
+            <div class="h-2 bg-gray-200 rounded-full overflow-hidden">
+              <div class="h-full bg-purple-500" style="width: 65%"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Privacy Notice -->
+      <div class="card bg-blue-50 border-blue-200">
+        <div class="flex">
+          <div class="flex-shrink-0">
+            <svg class="h-5 w-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+            </svg>
+          </div>
+          <div class="ml-3">
+            <h3 class="text-sm font-medium text-blue-800">Privacy Notice</h3>
+            <div class="mt-2 text-sm text-blue-700">
+              <p>Customer information is confidential. Only access customer data for legitimate business purposes.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</app-dashboard-layout>

@@ -1,0 +1,163 @@
+<app-dashboard-layout
+  title="My Accounts"
+  subtitle="View and manage all your accounts"
+  actionText="Open New Account"
+  [breadcrumbItems]="[
+    { label: 'Dashboard', link: '/customer/dashboard' },
+    { label: 'Accounts' }
+  ]"
+>
+  <!-- Stats Cards -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+    <app-dashboard-card
+      title="Total Balance"
+      [value]="formatCurrency(totalBalance())"
+      description="Across all accounts"
+      icon="💰"
+      iconColor="bg-green-100 text-green-600"
+    />
+    
+    <app-dashboard-card
+      title="Active Accounts"
+      [value]="activeAccounts().toString()"
+      description="Currently active"
+      icon="✅"
+      iconColor="bg-blue-100 text-blue-600"
+    />
+    
+    <app-dashboard-card
+      title="Monthly Fees"
+      [value]="formatCurrency(monthlyFees())"
+      description="Total monthly charges"
+      icon="📊"
+      iconColor="bg-red-100 text-red-600"
+    />
+  </div>
+
+  <!-- Filters -->
+  <div class="card mb-6">
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
+      <div>
+        <h3 class="text-lg font-medium text-gray-900">Account Overview</h3>
+        <p class="text-sm text-gray-500">Showing {{ filteredAccounts().length }} of {{ accounts().length }} accounts</p>
+      </div>
+      
+      <div class="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Account Type</label>
+          <select 
+            (change)="onTypeChange($event)"
+            class="select-field w-full sm:w-40"
+          >
+            @for (type of accountTypes; track type.value) {
+              <option [value]="type.value">{{ type.label }}</option>
+            }
+          </select>
+        </div>
+        
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+          <select 
+            (change)="onStatusChange($event)"
+            class="select-field w-full sm:w-40"
+          >
+            @for (status of statusTypes; track status.value) {
+              <option [value]="status.value">{{ status.label }}</option>
+            }
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Accounts Table -->
+  @if (isLoading()) {
+    <div class="card text-center py-12">
+      <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      <p class="mt-4 text-gray-600">Loading accounts...</p>
+    </div>
+  } @else {
+    <div class="card">
+      <app-data-table
+        [columns]="accountColumns"
+        [data]="filteredAccounts()"
+        [trackBy]="'id'"
+        [actions]="['view']"
+      />
+    </div>
+  }
+
+  <!-- Account Types Info -->
+  <div class="mt-8">
+    <h3 class="text-lg font-medium text-gray-900 mb-4">Account Types</h3>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      @for (type of accountTypes.slice(1); track type.value) {
+        <div class="card hover:shadow-card-lg transition-shadow">
+          <div class="flex items-center mb-3">
+            <div 
+              class="h-10 w-10 rounded-lg flex items-center justify-center mr-3"
+              [ngClass]="getAccountTypeColor(type.value)"
+            >
+              @switch (type.value) {
+                @case ('Checking') { C }
+                @case ('Savings') { S }
+                @case ('Business') { B }
+                @case ('FixedDeposit') { FD }
+                @case ('Loan') { L }
+                @case ('CreditCard') { CC }
+              }
+            </div>
+            <h4 class="font-medium text-gray-900">{{ type.label }}</h4>
+          </div>
+          <p class="text-sm text-gray-600 mb-4">
+            @switch (type.value) {
+              @case ('Checking') { Everyday transactions with easy access to funds }
+              @case ('Savings') { Earn interest while keeping your money safe }
+              @case ('Business') { Specialized accounts for business needs }
+              @case ('FixedDeposit') { Higher interest rates for fixed terms }
+              @case ('Loan') { Personal, auto, and home loans }
+              @case ('CreditCard') { Credit facilities with rewards programs }
+            }
+          </p>
+          <button class="w-full btn-secondary text-sm">Learn More</button>
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- Quick Actions -->
+  <div class="card mt-8">
+    <h3 class="text-lg font-medium text-gray-900 mb-4">Quick Account Actions</h3>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <button class="p-4 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors text-left">
+        <div class="h-10 w-10 bg-blue-100 rounded-lg flex items-center justify-center mb-3">
+          <svg class="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+          </svg>
+        </div>
+        <h4 class="font-medium text-gray-900">Open New Account</h4>
+        <p class="text-sm text-gray-600 mt-1">Apply for a new checking, savings, or investment account</p>
+      </button>
+      
+      <button class="p-4 bg-green-50 rounded-lg hover:bg-green-100 transition-colors text-left">
+        <div class="h-10 w-10 bg-green-100 rounded-lg flex items-center justify-center mb-3">
+          <svg class="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
+          </svg>
+        </div>
+        <h4 class="font-medium text-gray-900">Order Checkbook</h4>
+        <p class="text-sm text-gray-600 mt-1">Request a new checkbook for your checking account</p>
+      </button>
+      
+      <button class="p-4 bg-purple-50 rounded-lg hover:bg-purple-100 transition-colors text-left">
+        <div class="h-10 w-10 bg-purple-100 rounded-lg flex items-center justify-center mb-3">
+          <svg class="h-6 w-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+        </div>
+        <h4 class="font-medium text-gray-900">Update Details</h4>
+        <p class="text-sm text-gray-600 mt-1">Update your account information and preferences</p>
+      </button>
+    </div>
+  </div>
+</app-dashboard-layout>

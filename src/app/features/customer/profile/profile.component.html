@@ -1,0 +1,174 @@
+<app-dashboard-layout
+  title="My Profile"
+  subtitle="Manage your personal information and preferences"
+  [breadcrumbItems]="[
+    { label: 'Dashboard', link: '/customer/dashboard' },
+    { label: 'Profile' }
+  ]"
+  [actionText]="isEditing() ? '' : 'Edit Profile'"
+  (onAction)="startEditing()"
+>
+  @if (isLoading()) {
+    <div class="text-center py-12">
+      <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      <p class="mt-4 text-gray-600">Loading profile...</p>
+    </div>
+  } @else if (currentUser()) {
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <!-- Profile Information -->
+      <div class="lg:col-span-2">
+        <div class="card">
+          <h3 class="text-lg font-medium text-gray-900 mb-6">Personal Information</h3>
+          
+          @if (isEditing()) {
+            <!-- Edit Form -->
+            <form (ngSubmit)="saveProfile()" class="space-y-6">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">First Name *</label>
+                  <input type="text" class="input-field" [(ngModel)]="profileData().firstName" name="firstName" required>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Last Name *</label>
+                  <input type="text" class="input-field" [(ngModel)]="profileData().lastName" name="lastName" required>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Email *</label>
+                  <input type="email" class="input-field" [(ngModel)]="profileData().email" name="email" required>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Phone Number *</label>
+                  <input type="tel" class="input-field" [(ngModel)]="profileData().phoneNumber" name="phoneNumber" required>
+                </div>
+                <div class="md:col-span-2">
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Address *</label>
+                  <input type="text" class="input-field" [(ngModel)]="profileData().address" name="address" required>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">City *</label>
+                  <input type="text" class="input-field" [(ngModel)]="profileData().city" name="city" required>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">State *</label>
+                  <input type="text" class="input-field" [(ngModel)]="profileData().state" name="state" required>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">ZIP Code *</label>
+                  <input type="text" class="input-field" [(ngModel)]="profileData().zipCode" name="zipCode" required>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Date of Birth</label>
+                  <input type="date" class="input-field" [(ngModel)]="profileData().dateOfBirth" name="dateOfBirth">
+                </div>
+              </div>
+              
+              <div class="flex space-x-4 pt-6">
+                <button type="submit" [disabled]="isSaving()" class="btn-primary">
+                  @if (isSaving()) {
+                    <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Saving...
+                  } @else {
+                    Save Changes
+                  }
+                </button>
+                <button type="button" (click)="cancelEditing()" class="btn-secondary">Cancel</button>
+              </div>
+            </form>
+          } @else {
+            <!-- View Mode -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div class="space-y-4">
+                <div>
+                  <p class="text-sm font-medium text-gray-500">Full Name</p>
+                  <p class="text-gray-900">{{ currentUser()?.firstName }} {{ currentUser()?.lastName }}</p>
+                </div>
+                <div>
+                  <p class="text-sm font-medium text-gray-500">Email Address</p>
+                  <p class="text-gray-900">{{ currentUser()?.email }}</p>
+                </div>
+                <div>
+                  <p class="text-sm font-medium text-gray-500">Phone Number</p>
+                  <p class="text-gray-900">{{ currentUser()?.phoneNumber }}</p>
+                </div>
+                <div>
+                  <p class="text-sm font-medium text-gray-500">Date of Birth</p>
+                  <p class="text-gray-900">{{ formatDate(currentUser()!.dateOfBirth) }}</p>
+                </div>
+              </div>
+              
+              <div class="space-y-4">
+                <div>
+                  <p class="text-sm font-medium text-gray-500">Address</p>
+                  <p class="text-gray-900">{{ currentUser()?.address }}</p>
+                </div>
+                <div>
+                  <p class="text-sm font-medium text-gray-500">City</p>
+                  <p class="text-gray-900">{{ currentUser()?.city }}</p>
+                </div>
+                <div>
+                  <p class="text-sm font-medium text-gray-500">State</p>
+                  <p class="text-gray-900">{{ currentUser()?.state }}</p>
+                </div>
+                <div>
+                  <p class="text-sm font-medium text-gray-500">ZIP Code</p>
+                  <p class="text-gray-900">{{ currentUser()?.zipCode }}</p>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Account Summary -->
+      <div class="space-y-6">
+        <div class="card">
+          <h3 class="text-lg font-medium text-gray-900 mb-4">Account Summary</h3>
+          <div class="space-y-3">
+            <div class="flex justify-between">
+              <span class="text-sm text-gray-600">Customer ID</span>
+              <span class="text-sm font-medium text-gray-900">{{ currentUser()?.customerId }}</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-sm text-gray-600">Member Since</span>
+              <span class="text-sm font-medium text-gray-900">{{ formatDate(currentUser()!.createdAt) }}</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-sm text-gray-600">Last Login</span>
+              <span class="text-sm font-medium text-gray-900">
+                {{ currentUser()?.lastLogin ? formatDate(currentUser()!.lastLogin) : 'Never' }}
+              </span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-sm text-gray-600">Account Status</span>
+              <span class="text-sm font-medium text-green-600">Active</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Security -->
+        <div class="card">
+          <h3 class="text-lg font-medium text-gray-900 mb-4">Security</h3>
+          <div class="space-y-4">
+            <div>
+              <p class="text-sm font-medium text-gray-700 mb-1">Password</p>
+              <p class="text-sm text-gray-600 mb-2">Last changed 30 days ago</p>
+              <a routerLink="/auth/change-password" class="text-sm text-blue-600 hover:text-blue-500">
+                Change Password
+              </a>
+            </div>
+            <div>
+              <p class="text-sm font-medium text-gray-700 mb-1">Two-Factor Authentication</p>
+              <p class="text-sm text-gray-600 mb-2">Not enabled</p>
+              <a href="#" class="text-sm text-blue-600 hover:text-blue-500">
+                Enable 2FA
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+</app-dashboard-layout>

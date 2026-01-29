@@ -1,0 +1,433 @@
+<app-dashboard-layout
+  [title]="getTransactionTitle()"
+  subtitle="Process customer transactions"
+  [breadcrumbItems]="[
+    { label: 'Teller Dashboard', link: '/teller/dashboard' },
+    { label: 'Transaction Processing' }
+  ]"
+>
+  <!-- Transaction Type Selector -->
+  <div class="card mb-6">
+    <h3 class="text-lg font-medium text-gray-900 mb-4">Select Transaction Type</h3>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <button
+        (click)="setTransactionType('deposit')"
+        [class.bg-blue-50]="transactionType() === 'deposit'"
+        [class.border-blue-500]="transactionType() === 'deposit'"
+        class="p-4 border rounded-lg hover:bg-gray-50 transition-colors text-left"
+      >
+        <div class="h-10 w-10 bg-green-100 rounded-lg flex items-center justify-center mb-3">
+          <svg class="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path>
+          </svg>
+        </div>
+        <h4 class="font-medium text-gray-900">Cash Deposit</h4>
+        <p class="text-sm text-gray-600 mt-1">Add funds to account</p>
+      </button>
+      
+      <button
+        (click)="setTransactionType('withdrawal')"
+        [class.bg-blue-50]="transactionType() === 'withdrawal'"
+        [class.border-blue-500]="transactionType() === 'withdrawal'"
+        class="p-4 border rounded-lg hover:bg-gray-50 transition-colors text-left"
+      >
+        <div class="h-10 w-10 bg-red-100 rounded-lg flex items-center justify-center mb-3">
+          <svg class="h-6 w-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+          </svg>
+        </div>
+        <h4 class="font-medium text-gray-900">Cash Withdrawal</h4>
+        <p class="text-sm text-gray-600 mt-1">Withdraw funds from account</p>
+      </button>
+      
+      <button
+        (click)="setTransactionType('check')"
+        [class.bg-blue-50]="transactionType() === 'check'"
+        [class.border-blue-500]="transactionType() === 'check'"
+        class="p-4 border rounded-lg hover:bg-gray-50 transition-colors text-left"
+      >
+        <div class="h-10 w-10 bg-blue-100 rounded-lg flex items-center justify-center mb-3">
+          <svg class="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+        </div>
+        <h4 class="font-medium text-gray-900">Check Deposit</h4>
+        <p class="text-sm text-gray-600 mt-1">Deposit check to account</p>
+      </button>
+      
+      <button
+        (click)="setTransactionType('transfer')"
+        [class.bg-blue-50]="transactionType() === 'transfer'"
+        [class.border-blue-500]="transactionType() === 'transfer'"
+        class="p-4 border rounded-lg hover:bg-gray-50 transition-colors text-left"
+      >
+        <div class="h-10 w-10 bg-purple-100 rounded-lg flex items-center justify-center mb-3">
+          <svg class="h-6 w-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
+          </svg>
+        </div>
+        <h4 class="font-medium text-gray-900">Fund Transfer</h4>
+        <p class="text-sm text-gray-600 mt-1">Transfer between accounts</p>
+      </button>
+    </div>
+  </div>
+
+  <!-- Transaction Form -->
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- Left Column: Search and Account Info -->
+    <div class="lg:col-span-2">
+      <div class="card">
+        <h3 class="text-lg font-medium text-gray-900 mb-4">Transaction Details</h3>
+        
+        @if (validationErrors().length > 0) {
+          <div class="mb-6 rounded-lg bg-red-50 border border-red-200 p-4">
+            <div class="flex">
+              <div class="flex-shrink-0">
+                <svg class="h-5 w-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+              </div>
+              <div class="ml-3">
+                <h4 class="text-sm font-medium text-red-800">Validation Errors</h4>
+                <ul class="mt-2 text-sm text-red-700 list-disc list-inside">
+                  @for (error of validationErrors(); track error) {
+                    <li>{{ error }}</li>
+                  }
+                </ul>
+              </div>
+            </div>
+          </div>
+        }
+
+        <!-- Account Search -->
+        <div class="space-y-6">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">
+                Account Number *
+              </label>
+              <div class="flex">
+                <input
+                  type="text"
+                  [(ngModel)]="transactionData().accountNumber"
+                  (blur)="searchAccount()"
+                  class="input-field rounded-r-none"
+                  placeholder="Enter account number"
+                />
+                <button
+                  (click)="searchAccount()"
+                  [disabled]="isLoading()"
+                  class="px-4 py-2 bg-blue-600 text-white rounded-r-lg hover:bg-blue-700 disabled:opacity-50"
+                >
+                  @if (isLoading()) {
+                    <svg class="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                  } @else {
+                    Search
+                  }
+                </button>
+              </div>
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">
+                Customer ID
+              </label>
+              <div class="flex">
+                <input
+                  type="text"
+                  [(ngModel)]="transactionData().customerId"
+                  (blur)="searchByCustomerId()"
+                  class="input-field rounded-r-none"
+                  placeholder="Customer ID"
+                />
+                <button
+                  (click)="searchByCustomerId()"
+                  [disabled]="isLoading()"
+                  class="px-4 py-2 bg-blue-600 text-white rounded-r-lg hover:bg-blue-700 disabled:opacity-50"
+                >
+                  @if (isLoading()) {
+                    <svg class="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                  } @else {
+                    Search
+                  }
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Found Account Info -->
+          @if (foundAccount() && foundCustomer()) {
+            <div class="p-4 bg-blue-50 rounded-lg border border-blue-200">
+              <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+                <div class="mb-4 md:mb-0">
+                  <h4 class="font-medium text-gray-900">{{ foundCustomer()!.firstName }} {{ foundCustomer()!.lastName }}</h4>
+                  <p class="text-sm text-gray-600">
+                    Account: {{ foundAccount()!.accountNumber }} | 
+                    Type: {{ foundAccount()!.type }} | 
+                    Balance: {{ formatCurrency(foundAccount()!.balance) }}
+                  </p>
+                  <p class="text-sm text-gray-600 mt-1">
+                    Customer ID: {{ foundCustomer()!.customerId }} | 
+                    Status: <span class="text-green-600">{{ foundAccount()!.status }}</span>
+                  </p>
+                </div>
+                <div class="flex items-center">
+                  <input
+                    type="checkbox"
+                    [(ngModel)]="transactionData().customerVerified"
+                    id="customerVerified"
+                    class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  />
+                  <label for="customerVerified" class="ml-2 text-sm text-gray-700">
+                    Customer Verified (ID Checked)
+                  </label>
+                </div>
+              </div>
+            </div>
+          }
+
+          <!-- Transaction Amount -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              Amount *
+            </label>
+            <div class="relative">
+              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <span class="text-gray-500">$</span>
+              </div>
+              <input
+                type="number"
+                [(ngModel)]="transactionData().amount"
+                step="0.01"
+                min="0.01"
+                class="input-field pl-7"
+                placeholder="0.00"
+                required
+              />
+            </div>
+            
+            <!-- Quick Amounts -->
+            <div class="mt-3 flex flex-wrap gap-2">
+              @for (amount of quickAmounts; track amount) {
+                <button
+                  type="button"
+                  (click)="quickFillAmount(amount)"
+                  class="px-3 py-1.5 text-sm bg-gray-100 hover:bg-gray-200 rounded"
+                >
+                  ${{ amount }}
+                </button>
+              }
+            </div>
+          </div>
+
+          <!-- Additional Fields -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            @if (transactionType() === 'check') {
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">
+                  Check Number *
+                </label>
+                <input
+                  type="text"
+                  [(ngModel)]="transactionData().checkNumber"
+                  class="input-field"
+                  placeholder="Check number"
+                  required
+                />
+              </div>
+            }
+            
+            <div [class.md:col-span-2]="transactionType() !== 'check'">
+              <label class="block text-sm font-medium text-gray-700 mb-1">
+                Description
+              </label>
+              <input
+                type="text"
+                [(ngModel)]="transactionData().description"
+                class="input-field"
+                placeholder="Transaction description"
+              />
+            </div>
+          </div>
+
+          <!-- Payment Method -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              Payment Method
+            </label>
+            <select
+              [(ngModel)]="transactionData().paymentMethod"
+              class="select-field"
+            >
+              <option value="cash">Cash</option>
+              <option value="check">Check</option>
+              <option value="debit">Debit Card</option>
+              <option value="transfer">Bank Transfer</option>
+            </select>
+          </div>
+
+          <!-- Submit Button -->
+          <div class="pt-6">
+            <button
+              (click)="processTransaction()"
+              [disabled]="isProcessing() || !transactionData().customerVerified"
+              class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+            >
+              @if (isProcessing()) {
+                <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Processing...
+              } @else {
+                Process {{ transactionType().charAt(0).toUpperCase() + transactionType().slice(1) }}
+              }
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column: Transaction Result and Info -->
+    <div class="space-y-6">
+      <!-- Transaction Result -->
+      @if (transactionResult()) {
+        <div class="card">
+          <div class="rounded-lg bg-green-50 border border-green-200 p-4 mb-4">
+            <div class="flex">
+              <div class="flex-shrink-0">
+                <svg class="h-5 w-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+              </div>
+              <div class="ml-3">
+                <h3 class="text-sm font-medium text-green-800">Transaction Successful!</h3>
+                <p class="mt-1 text-sm text-green-700">
+                  Transaction ID: {{ transactionResult().transactionId }}
+                </p>
+              </div>
+            </div>
+          </div>
+          
+          <div class="space-y-4">
+            <div class="flex justify-between">
+              <span class="text-sm text-gray-600">Amount</span>
+              <span class="text-lg font-bold text-gray-900">
+                {{ formatCurrency(transactionResult().amount) }}
+              </span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-sm text-gray-600">Customer</span>
+              <span class="text-sm font-medium text-gray-900">
+                {{ transactionResult().customerName }}
+              </span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-sm text-gray-600">Account</span>
+              <span class="text-sm font-medium text-gray-900">
+                {{ transactionResult().accountNumber }}
+              </span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-sm text-gray-600">Receipt #</span>
+              <span class="text-sm font-medium text-gray-900">
+                {{ transactionResult().receiptNumber }}
+              </span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-sm text-gray-600">Time</span>
+              <span class="text-sm text-gray-900">
+                {{ transactionResult().timestamp | date:'shortTime' }}
+              </span>
+            </div>
+          </div>
+          
+          <div class="mt-6 space-y-3">
+            <button
+              (click)="printReceipt()"
+              class="w-full btn-primary"
+            >
+              Print Receipt
+            </button>
+            <button
+              (click)="resetForm()"
+              class="w-full btn-secondary"
+            >
+              New Transaction
+            </button>
+          </div>
+        </div>
+      }
+
+      <!-- Transaction Limits -->
+      <div class="card">
+        <h3 class="text-lg font-medium text-gray-900 mb-4">Transaction Limits</h3>
+        <div class="space-y-4">
+          <div>
+            <div class="flex justify-between text-sm mb-1">
+              <span class="text-gray-600">Cash Deposit (Daily)</span>
+              <span class="font-medium text-gray-900">$10,000</span>
+            </div>
+            <div class="h-2 bg-gray-200 rounded-full overflow-hidden">
+              <div class="h-full bg-green-500" style="width: 45%"></div>
+            </div>
+          </div>
+          
+          <div>
+            <div class="flex justify-between text-sm mb-1">
+              <span class="text-gray-600">Cash Withdrawal (Daily)</span>
+              <span class="font-medium text-gray-900">$5,000</span>
+            </div>
+            <div class="h-2 bg-gray-200 rounded-full overflow-hidden">
+              <div class="h-full bg-blue-500" style="width: 60%"></div>
+            </div>
+          </div>
+          
+          <div>
+            <div class="flex justify-between text-sm mb-1">
+              <span class="text-gray-600">Check Deposit (Single)</span>
+              <span class="font-medium text-gray-900">$25,000</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Security Reminders -->
+      <div class="card">
+        <h3 class="text-lg font-medium text-gray-900 mb-4">Security Reminders</h3>
+        <ul class="space-y-3 text-sm text-gray-600">
+          <li class="flex items-start">
+            <svg class="h-5 w-5 text-red-500 mr-2 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.998-.833-2.732 0L4.342 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+            </svg>
+            <span>Always verify customer ID before processing transactions</span>
+          </li>
+          <li class="flex items-start">
+            <svg class="h-5 w-5 text-yellow-500 mr-2 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <span>Check for suspicious activity or large unusual transactions</span>
+          </li>
+          <li class="flex items-start">
+            <svg class="h-5 w-5 text-green-500 mr-2 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <span>Count cash twice and have customer verify amounts</span>
+          </li>
+          <li class="flex items-start">
+            <svg class="h-5 w-5 text-blue-500 mr-2 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+            </svg>
+            <span>Secure cash drawer after each transaction</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</app-dashboard-layout>

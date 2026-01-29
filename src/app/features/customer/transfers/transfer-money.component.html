@@ -1,0 +1,475 @@
+<app-dashboard-layout
+  title="Transfer Money"
+  subtitle="Send money between accounts or to others"
+  [breadcrumbItems]="[
+    { label: 'Dashboard', link: '/customer/dashboard' },
+    { label: 'Transfers' }
+  ]"
+>
+  @if (isLoading()) {
+    <div class="text-center py-12">
+      <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      <p class="mt-4 text-gray-600">Loading transfer data...</p>
+    </div>
+  } @else {
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <!-- Transfer Form -->
+      <div class="lg:col-span-2 space-y-6">
+        @if (successMessage()) {
+          <div class="rounded-lg bg-green-50 border border-green-200 p-4">
+            <div class="flex">
+              <div class="flex-shrink-0">
+                <svg class="h-5 w-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+              </div>
+              <div class="ml-3">
+                <p class="text-sm font-medium text-green-800">{{ successMessage() }}</p>
+              </div>
+            </div>
+          </div>
+        }
+
+        @if (errorMessage()) {
+          <div class="rounded-lg bg-red-50 border border-red-200 p-4">
+            <div class="flex">
+              <div class="flex-shrink-0">
+                <svg class="h-5 w-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+              </div>
+              <div class="ml-3">
+                <p class="text-sm font-medium text-red-800">{{ errorMessage() }}</p>
+              </div>
+            </div>
+          </div>
+        }
+
+        <!-- Transfer Type Selection -->
+        <div class="card">
+          <h3 class="text-lg font-medium text-gray-900 mb-4">Transfer Type</h3>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <button
+              (click)="onTransferTypeChange('internal')"
+              [class.bg-blue-50]="transferType() === 'internal'"
+              [class.border-blue-500]="transferType() === 'internal'"
+              class="p-4 border rounded-lg hover:bg-gray-50 transition-colors text-left"
+            >
+              <div class="h-10 w-10 bg-blue-100 rounded-lg flex items-center justify-center mb-3">
+                <svg class="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
+                </svg>
+              </div>
+              <h4 class="font-medium text-gray-900">Between My Accounts</h4>
+              <p class="text-sm text-gray-600 mt-1">Transfer between your SecureBank accounts</p>
+            </button>
+            
+            <button
+              (click)="onTransferTypeChange('beneficiary')"
+              [class.bg-blue-50]="transferType() === 'beneficiary'"
+              [class.border-blue-500]="transferType() === 'beneficiary'"
+              class="p-4 border rounded-lg hover:bg-gray-50 transition-colors text-left"
+            >
+              <div class="h-10 w-10 bg-green-100 rounded-lg flex items-center justify-center mb-3">
+                <svg class="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                </svg>
+              </div>
+              <h4 class="font-medium text-gray-900">To Beneficiary</h4>
+              <p class="text-sm text-gray-600 mt-1">Send to saved beneficiaries</p>
+            </button>
+            
+            <button
+              (click)="onTransferTypeChange('external')"
+              [class.bg-blue-50]="transferType() === 'external'"
+              [class.border-blue-500]="transferType() === 'external'"
+              class="p-4 border rounded-lg hover:bg-gray-50 transition-colors text-left"
+            >
+              <div class="h-10 w-10 bg-purple-100 rounded-lg flex items-center justify-center mb-3">
+                <svg class="h-6 w-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4 4 0 003 15z"></path>
+                </svg>
+              </div>
+              <h4 class="font-medium text-gray-900">To Other Bank</h4>
+              <p class="text-sm text-gray-600 mt-1">Send to accounts at other banks</p>
+            </button>
+          </div>
+        </div>
+
+        <!-- Transfer Form -->
+        <div class="card">
+          <h3 class="text-lg font-medium text-gray-900 mb-4">Transfer Details</h3>
+          <form (ngSubmit)="onSubmit()" class="space-y-6">
+            <!-- From Account -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">
+                From Account *
+              </label>
+              <select
+                [(ngModel)]="transferData().fromAccountId"
+                name="fromAccount"
+                class="select-field"
+                required
+              >
+                @for (account of userAccounts(); track account.id) {
+                  <option [value]="account.id">
+                    {{ account.type }} - {{ account.accountNumber }}
+                    ({{ formatCurrency(account.availableBalance) }} available)
+                  </option>
+                }
+              </select>
+              @if (getFromAccount()) {
+                <p class="mt-1 text-sm text-gray-500">
+                  Available balance: {{ formatCurrency(getFromAccount()!.availableBalance) }}
+                </p>
+              }
+            </div>
+
+            <!-- To Account/Beneficiary -->
+            @if (transferType() === 'internal') {
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">
+                  To Account *
+                </label>
+                <select
+                  [(ngModel)]="transferData().toAccountId"
+                  name="toAccount"
+                  class="select-field"
+                  required
+                >
+                  <option value="">Select account</option>
+                  @for (account of userAccounts(); track account.id) {
+                    <option [value]="account.id" [disabled]="account.id === transferData().fromAccountId">
+                      {{ account.type }} - {{ account.accountNumber }}
+                      ({{ formatCurrency(account.balance) }})
+                    </option>
+                  }
+                </select>
+              </div>
+            } @else if (transferType() === 'beneficiary') {
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">
+                  To Beneficiary *
+                </label>
+                <select
+                  [(ngModel)]="transferData().toBeneficiaryId"
+                  name="toBeneficiary"
+                  class="select-field"
+                  required
+                >
+                  <option value="">Select beneficiary</option>
+                  @for (beneficiary of beneficiaries(); track beneficiary.id) {
+                    <option [value]="beneficiary.id">
+                      {{ beneficiary.name }} - {{ beneficiary.accountNumber }}
+                      ({{ beneficiary.bankName }})
+                    </option>
+                  }
+                </select>
+                <div class="mt-2">
+                  <a routerLink="/customer/beneficiaries" class="text-sm text-blue-600 hover:text-blue-500">
+                    + Add new beneficiary
+                  </a>
+                </div>
+              </div>
+            } @else {
+              <div class="space-y-4">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">
+                    Bank Name *
+                  </label>
+                  <input
+                    type="text"
+                    class="input-field"
+                    placeholder="Destination bank name"
+                    required
+                  />
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">
+                    Account Number *
+                  </label>
+                  <input
+                    type="text"
+                    class="input-field"
+                    placeholder="Destination account number"
+                    required
+                  />
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">
+                    Routing Number *
+                  </label>
+                  <input
+                    type="text"
+                    class="input-field"
+                    placeholder="Bank routing number"
+                    required
+                  />
+                </div>
+              </div>
+            }
+
+            <!-- Amount -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">
+                Amount *
+              </label>
+              <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <span class="text-gray-500 sm:text-sm">$</span>
+                </div>
+                <input
+                  type="number"
+                  [(ngModel)]="transferData().amount"
+                  name="amount"
+                  step="0.01"
+                  min="0.01"
+                  class="input-field pl-7"
+                  placeholder="0.00"
+                  required
+                />
+              </div>
+              
+              <!-- Quick Amount Buttons -->
+              <div class="mt-2 flex space-x-2">
+                @for (amount of [50, 100, 500, 1000]; track amount) {
+                  <button
+                    type="button"
+                    (click)="quickFillAmount(amount)"
+                    class="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded"
+                  >
+                    ${{ amount }}
+                  </button>
+                }
+              </div>
+            </div>
+
+            <!-- Description -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">
+                Description
+              </label>
+              <input
+                type="text"
+                [(ngModel)]="transferData().description"
+                name="description"
+                class="input-field"
+                placeholder="Optional description for your records"
+              />
+            </div>
+
+            <!-- Schedule Transfer -->
+            <div class="space-y-4">
+              <div class="flex items-center">
+                <input
+                  type="checkbox"
+                  [(ngModel)]="transferData().isScheduled"
+                  name="isScheduled"
+                  id="isScheduled"
+                  class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                />
+                <label for="isScheduled" class="ml-2 block text-sm text-gray-700">
+                  Schedule this transfer
+                </label>
+              </div>
+
+              @if (transferData().isScheduled) {
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">
+                    Schedule Date
+                  </label>
+                  <input
+                    type="date"
+                    [(ngModel)]="transferData().scheduleDate"
+                    name="scheduleDate"
+                    class="input-field"
+                  />
+                </div>
+
+                <div class="flex items-center">
+                  <input
+                    type="checkbox"
+                    [(ngModel)]="transferData().isRecurring"
+                    name="isRecurring"
+                    id="isRecurring"
+                    class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  />
+                  <label for="isRecurring" class="ml-2 block text-sm text-gray-700">
+                    Make this a recurring transfer
+                  </label>
+                </div>
+
+                @if (transferData().isRecurring) {
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                      Recurrence
+                    </label>
+                    <select
+                      [(ngModel)]="transferData().recurrence"
+                      name="recurrence"
+                      class="select-field"
+                    >
+                      <option value="none">One time only</option>
+                      <option value="weekly">Weekly</option>
+                      <option value="monthly">Monthly</option>
+                      <option value="quarterly">Quarterly</option>
+                    </select>
+                  </div>
+                }
+              }
+            </div>
+
+            <!-- Submit Button -->
+            <div class="pt-6">
+              <button
+                type="submit"
+                [disabled]="isSubmitting()"
+                class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+              >
+                @if (isSubmitting()) {
+                  <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Processing...
+                } @else {
+                  Review Transfer
+                }
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Sidebar -->
+      <div class="space-y-6">
+        <!-- Transfer Limits -->
+        <div class="card">
+          <h3 class="text-lg font-medium text-gray-900 mb-4">Transfer Limits</h3>
+          <div class="space-y-4">
+            <div>
+              <div class="flex justify-between text-sm mb-1">
+                <span class="text-gray-600">Daily Limit</span>
+                <span class="font-medium text-gray-900">
+                  {{ formatCurrency(dailyUsed()) }} of {{ formatCurrency(dailyLimit()) }}
+                </span>
+              </div>
+              <div class="h-2 bg-gray-200 rounded-full overflow-hidden">
+                <div 
+                  class="h-full transition-all duration-300"
+                  [class]="getDailyLimitColor()"
+                  [style.width]="getDailyLimitProgress() + '%'"
+                ></div>
+              </div>
+              <p class="mt-1 text-xs text-gray-500">
+                Resets daily at midnight
+              </p>
+            </div>
+            
+            <div>
+              <p class="text-sm text-gray-600">Single Transaction Limit</p>
+              <p class="text-lg font-medium text-gray-900">{{ formatCurrency(singleLimit()) }}</p>
+            </div>
+            
+            <div>
+              <p class="text-sm text-gray-600">Available for Transfer Today</p>
+              <p class="text-lg font-medium text-gray-900">
+                {{ formatCurrency(dailyLimit() - dailyUsed()) }}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- From Account Summary -->
+        @if (getFromAccount()) {
+          <div class="card">
+            <h3 class="text-lg font-medium text-gray-900 mb-4">Source Account</h3>
+            <div class="space-y-3">
+              <div class="flex justify-between">
+                <span class="text-sm text-gray-600">Account Type</span>
+                <span class="text-sm font-medium text-gray-900">{{ getFromAccount()!.type }}</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-sm text-gray-600">Account Number</span>
+                <span class="text-sm font-medium text-gray-900">{{ getFromAccount()!.accountNumber }}</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-sm text-gray-600">Available Balance</span>
+                <span class="text-sm font-medium text-gray-900">
+                  {{ formatCurrency(getFromAccount()!.availableBalance) }}
+                </span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-sm text-gray-600">Current Balance</span>
+                <span class="text-sm font-medium text-gray-900">
+                  {{ formatCurrency(getFromAccount()!.balance) }}
+                </span>
+              </div>
+            </div>
+          </div>
+        }
+
+        <!-- Transfer Info -->
+        <div class="card">
+          <h3 class="text-lg font-medium text-gray-900 mb-4">Transfer Information</h3>
+          <ul class="space-y-3 text-sm text-gray-600">
+            <li class="flex items-start">
+              <svg class="h-5 w-5 text-green-500 mr-2 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+              <span>Internal transfers are processed instantly</span>
+            </li>
+            <li class="flex items-start">
+              <svg class="h-5 w-5 text-green-500 mr-2 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+              <span>Beneficiary transfers are processed within 1 business day</span>
+            </li>
+            <li class="flex items-start">
+              <svg class="h-5 w-5 text-green-500 mr-2 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+              <span>External bank transfers take 2-3 business days</span>
+            </li>
+            <li class="flex items-start">
+              <svg class="h-5 w-5 text-yellow-500 mr-2 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.998-.833-2.732 0L4.342 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+              </svg>
+              <span>Review all details before confirming transfer</span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Scheduled Transfers -->
+        <div class="card">
+          <h3 class="text-lg font-medium text-gray-900 mb-4">Scheduled Transfers</h3>
+          <div class="space-y-3">
+            <div class="p-3 bg-gray-50 rounded-lg">
+              <div class="flex justify-between items-center">
+                <div>
+                  <p class="font-medium text-gray-900">To Savings Account</p>
+                  <p class="text-sm text-gray-500">Every Friday</p>
+                </div>
+                <p class="font-medium text-gray-900">$200.00</p>
+              </div>
+            </div>
+            <div class="p-3 bg-gray-50 rounded-lg">
+              <div class="flex justify-between items-center">
+                <div>
+                  <p class="font-medium text-gray-900">Mortgage Payment</p>
+                  <p class="text-sm text-gray-500">1st of each month</p>
+                </div>
+                <p class="font-medium text-gray-900">$1,250.00</p>
+              </div>
+            </div>
+          </div>
+          <div class="mt-4">
+            <a href="#" class="text-sm text-blue-600 hover:text-blue-500">
+              View all scheduled transfers →
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+</app-dashboard-layout>

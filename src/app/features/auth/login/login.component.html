@@ -1,0 +1,170 @@
+<div class="min-h-screen bg-gradient-to-br from-primary-50 to-gray-100 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+  <div class="max-w-md w-full space-y-8">
+    <!-- Logo and Header -->
+    <div class="text-center">
+      <div class="mx-auto h-12 w-12 bg-primary-600 rounded-full flex items-center justify-center mb-4">
+        <span class="text-white text-xl font-bold">B</span>
+      </div>
+      <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
+        Welcome to SecureBank
+      </h2>
+      <p class="mt-2 text-center text-sm text-gray-600">
+        Sign in to access your banking dashboard
+      </p>
+    </div>
+    
+    <!-- Demo Credentials -->
+    <div class="bg-white rounded-lg shadow-sm p-4 border border-gray-200">
+      <p class="text-sm font-medium text-gray-700 mb-2">Demo Credentials:</p>
+      <div class="grid grid-cols-2 gap-2">
+        <button 
+          (click)="fillDemoCredentials('admin')"
+          class="text-xs px-3 py-2 bg-primary-50 text-primary-700 rounded hover:bg-primary-100 transition-colors"
+        >
+          Admin
+        </button>
+        <button 
+          (click)="fillDemoCredentials('manager')"
+          class="text-xs px-3 py-2 bg-blue-50 text-blue-700 rounded hover:bg-blue-100 transition-colors"
+        >
+          Manager
+        </button>
+        <button 
+          (click)="fillDemoCredentials('teller')"
+          class="text-xs px-3 py-2 bg-green-50 text-green-700 rounded hover:bg-green-100 transition-colors"
+        >
+          Teller
+        </button>
+        <button 
+          (click)="fillDemoCredentials('customer')"
+          class="text-xs px-3 py-2 bg-purple-50 text-purple-700 rounded hover:bg-purple-100 transition-colors"
+        >
+          Customer
+        </button>
+      </div>
+    </div>
+    
+    <!-- Login Form -->
+    <div class="card">
+      <form class="space-y-6" (ngSubmit)="onSubmit()" #loginForm="ngForm">
+        <div>
+          <label for="username" class="block text-sm font-medium text-gray-700 mb-1">
+            Username
+          </label>
+          <input
+            id="username"
+            name="username"
+            type="text"
+            required
+            [(ngModel)]="credentials().username"
+            class="input-field"
+            placeholder="Enter your username"
+            [disabled]="isLoading()"
+          />
+        </div>
+        
+        <div>
+          <label for="password" class="block text-sm font-medium text-gray-700 mb-1">
+            Password
+          </label>
+          <div class="relative">
+            <input
+              id="password"
+              name="password"
+              [type]="showPassword() ? 'text' : 'password'"
+              required
+              [(ngModel)]="credentials().password"
+              class="input-field pr-10"
+              placeholder="Enter your password"
+              [disabled]="isLoading()"
+            />
+            <button
+              type="button"
+              (click)="togglePasswordVisibility()"
+              class="absolute inset-y-0 right-0 pr-3 flex items-center"
+            >
+              @if (showPassword()) {
+                <span class="text-gray-500 hover:text-gray-700">Hide</span>
+              } @else {
+                <span class="text-gray-500 hover:text-gray-700">Show</span>
+              }
+            </button>
+          </div>
+        </div>
+        
+        @if (errorMessage()) {
+          <div class="rounded-md bg-red-50 p-4 border border-red-200">
+            <div class="flex">
+              <div class="flex-shrink-0">
+                <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                </svg>
+              </div>
+              <div class="ml-3">
+                <p class="text-sm font-medium text-red-800">{{ errorMessage() }}</p>
+              </div>
+            </div>
+          </div>
+        }
+        
+        <div class="flex items-center justify-between">
+          <div class="text-sm">
+            <a 
+              routerLink="/forgot-password" 
+              class="font-medium text-primary-600 hover:text-primary-500"
+            >
+              Forgot your password?
+            </a>
+          </div>
+        </div>
+        
+        <div>
+          <button
+            type="submit"
+            [disabled]="isLoading()"
+            class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+          >
+            @if (isLoading()) {
+              <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              Signing in...
+            } @else {
+              Sign in
+            }
+          </button>
+        </div>
+      </form>
+      
+      <div class="mt-6">
+        <div class="relative">
+          <div class="absolute inset-0 flex items-center">
+            <div class="w-full border-t border-gray-300"></div>
+          </div>
+          <div class="relative flex justify-center text-sm">
+            <span class="px-2 bg-white text-gray-500">New to SecureBank?</span>
+          </div>
+        </div>
+        
+        <div class="mt-6">
+          <a 
+            routerLink="/register"
+            class="w-full flex justify-center py-3 px-4 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors duration-200"
+          >
+            Create a new account
+          </a>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Footer -->
+    <div class="text-center text-xs text-gray-500">
+      <p>© 2024 SecureBank. All rights reserved.</p>
+      <p class="mt-1">
+        <a href="#" class="text-primary-600 hover:text-primary-500">Privacy Policy</a> • 
+        <a href="#" class="text-primary-600 hover:text-primary-500">Terms of Service</a>
+      </p>
+    </div>
+  </div>
+</div>

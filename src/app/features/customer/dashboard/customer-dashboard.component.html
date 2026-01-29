@@ -1,0 +1,247 @@
+<app-dashboard-layout
+  [title]="getGreeting() + ', ' + (currentUser()?.firstName || 'Customer') + '!'"
+  subtitle="Here's your banking overview"
+  [breadcrumbItems]="[{ label: 'Dashboard' }]"
+>
+  <!-- Stats Cards -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <app-dashboard-card
+      title="Total Balance"
+      [value]="formatCurrency(totalBalance())"
+      description="Across all accounts"
+      icon="💰"
+      iconColor="bg-green-100 text-green-600"
+      [trend]="2.5"
+      actionText="View Accounts"
+    />
+    
+    <app-dashboard-card
+      title="Active Accounts"
+      [value]="activeAccounts().toString()"
+      description="Currently active"
+      icon="🏦"
+      iconColor="bg-blue-100 text-blue-600"
+      actionText="Manage Accounts"
+    />
+    
+    <app-dashboard-card
+      title="Monthly Transactions"
+      [value]="monthlyTransactions().toString()"
+      description="Past 30 days"
+      icon="📊"
+      iconColor="bg-purple-100 text-purple-600"
+      [trend]="12.3"
+    />
+    
+    <app-dashboard-card
+      title="Monthly Spending"
+      [value]="formatCurrency(monthlySpending())"
+      description="Past 30 days"
+      icon="💸"
+      iconColor="bg-red-100 text-red-600"
+      [trend]="-5.2"
+    />
+  </div>
+
+  <!-- Quick Actions -->
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- Quick Transfer -->
+    <div class="card">
+      <h3 class="text-lg font-medium text-gray-900 mb-4">Quick Transfer</h3>
+      <div class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">From Account</label>
+          <select class="select-field">
+            <option>Select account</option>
+            @for (account of accounts(); track account.id) {
+              <option [value]="account.id">
+                {{ account.accountNumber }} ({{ formatCurrency(account.balance) }})
+              </option>
+            }
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">To Account</label>
+          <input type="text" class="input-field" placeholder="Account number or select beneficiary">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Amount</label>
+          <input type="number" class="input-field" placeholder="0.00">
+        </div>
+        <button class="w-full btn-primary">Make Transfer</button>
+      </div>
+    </div>
+
+    <!-- Account Summary -->
+    <div class="card">
+      <h3 class="text-lg font-medium text-gray-900 mb-4">Account Summary</h3>
+      <div class="space-y-3">
+        @for (account of accounts().slice(0, 3); track account.id) {
+          <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+            <div>
+              <p class="font-medium text-gray-900">{{ account.type }} Account</p>
+              <p class="text-sm text-gray-500">{{ account.accountNumber }}</p>
+            </div>
+            <div class="text-right">
+              <p class="font-medium text-gray-900">{{ formatCurrency(account.balance) }}</p>
+              <p class="text-sm text-green-600">{{ account.status }}</p>
+            </div>
+          </div>
+        }
+      </div>
+      @if (accounts().length > 3) {
+        <div class="mt-4">
+          <a routerLink="/customer/accounts" class="text-blue-600 hover:text-blue-500 text-sm font-medium">
+            View all {{ accounts().length }} accounts →
+          </a>
+        </div>
+      }
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="card">
+      <h3 class="text-lg font-medium text-gray-900 mb-4">Recent Activity</h3>
+      <div class="space-y-3">
+        @for (transaction of recentTransactions().slice(0, 5); track transaction.id) {
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="font-medium text-gray-900">{{ transaction.description }}</p>
+              <p class="text-sm text-gray-500">{{ transaction.date | date:'MMM d' }}</p>
+            </div>
+            <div class="text-right">
+              <p 
+                class="font-medium"
+                [class.text-green-600]="transaction.type === 'Deposit' || transaction.type === 'Interest'"
+                [class.text-red-600]="transaction.type === 'Withdrawal' || transaction.type === 'Payment' || transaction.type === 'Fee'"
+              >
+                {{ transaction.type === 'Deposit' || transaction.type === 'Interest' ? '+' : '-' }}{{ formatCurrency(transaction.amount) }}
+              </p>
+              <span 
+                class="text-xs px-2 py-1 rounded-full"
+                [class.bg-green-100]="transaction.status === 'Completed'"
+                [class.text-green-800]="transaction.status === 'Completed'"
+                [class.bg-yellow-100]="transaction.status === 'Pending'"
+                [class.text-yellow-800]="transaction.status === 'Pending'"
+              >
+                {{ transaction.status }}
+              </span>
+            </div>
+          </div>
+        }
+      </div>
+      @if (recentTransactions().length > 5) {
+        <div class="mt-4">
+          <a routerLink="/customer/transactions" class="text-blue-600 hover:text-blue-500 text-sm font-medium">
+            View all transactions →
+          </a>
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- Recent Transactions Table -->
+  <div class="card">
+    <div class="flex items-center justify-between mb-6">
+      <div>
+        <h3 class="text-lg font-medium text-gray-900">Recent Transactions</h3>
+        <p class="text-sm text-gray-500">Your latest account activity</p>
+      </div>
+      <a routerLink="/customer/transactions" class="btn-secondary text-sm">
+        View All
+      </a>
+    </div>
+    
+    <app-data-table
+      [columns]="transactionColumns"
+      [data]="recentTransactions()"
+      [trackBy]="'id'"
+      [actions]="['view']"
+    />
+  </div>
+
+  <!-- Upcoming Payments -->
+  <div class="card">
+    <h3 class="text-lg font-medium text-gray-900 mb-4">Upcoming Payments</h3>
+    <div class="overflow-hidden">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th class="table-header">Payment</th>
+            <th class="table-header">Due Date</th>
+            <th class="table-header">Amount</th>
+            <th class="table-header">Status</th>
+            <th class="table-header">Action</th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+          <tr>
+            <td class="table-cell">Credit Card Payment</td>
+            <td class="table-cell">Jan 15, 2024</td>
+            <td class="table-cell font-medium">$450.00</td>
+            <td class="table-cell">
+              <span class="badge badge-warning">Pending</span>
+            </td>
+            <td class="table-cell">
+              <button class="text-blue-600 hover:text-blue-900 text-sm">Pay Now</button>
+            </td>
+          </tr>
+          <tr>
+            <td class="table-cell">Mortgage Payment</td>
+            <td class="table-cell">Jan 20, 2024</td>
+            <td class="table-cell font-medium">$1,250.00</td>
+            <td class="table-cell">
+              <span class="badge badge-warning">Scheduled</span>
+            </td>
+            <td class="table-cell">
+              <button class="text-blue-600 hover:text-blue-900 text-sm">Edit</button>
+            </td>
+          </tr>
+          <tr>
+            <td class="table-cell">Utility Bill</td>
+            <td class="table-cell">Jan 25, 2024</td>
+            <td class="table-cell font-medium">$85.50</td>
+            <td class="table-cell">
+              <span class="badge badge-success">AutoPay</span>
+            </td>
+            <td class="table-cell">
+              <button class="text-blue-600 hover:text-blue-900 text-sm">Manage</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Financial Tips -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div class="card">
+      <div class="h-10 w-10 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
+        <svg class="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+      </div>
+      <h4 class="font-medium text-gray-900 mb-2">Save More Efficiently</h4>
+      <p class="text-sm text-gray-600">Consider setting up automatic transfers to your savings account each month.</p>
+    </div>
+    
+    <div class="card">
+      <div class="h-10 w-10 bg-green-100 rounded-lg flex items-center justify-center mb-4">
+        <svg class="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+        </svg>
+      </div>
+      <h4 class="font-medium text-gray-900 mb-2">Investment Opportunities</h4>
+      <p class="text-sm text-gray-600">Explore our high-yield savings accounts and investment options.</p>
+    </div>
+    
+    <div class="card">
+      <div class="h-10 w-10 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
+        <svg class="h-6 w-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+        </svg>
+      </div>
+      <h4 class="font-medium text-gray-900 mb-2">Security Alert</h4>
+      <p class="text-sm text-gray-600">Your account security is up to date. Consider enabling two-factor authentication.</p>
+    </div>
+  </div>
+</app-dashboard-layout>
