@@ -49,5 +49,6 @@ export class DashboardCardComponent {
   @Input() trend?: number;
   @Input() actionText = '';
   @Input() onAction: any;
-Math: any;
+  
+  Math = Math;
 }

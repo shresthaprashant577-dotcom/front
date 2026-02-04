@@ -1,0 +1,1230 @@
+<div class="admin-management">
+    <app-dashboard-layout>
+        <!-- Header Section -->
+        <div class="bg-white shadow-sm border-b border-gray-200">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+                <div class="md:flex md:items-center md:justify-between">
+                    <div class="flex-1 min-w-0">
+                        <h1 class="text-2xl font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">
+                            Admin Management System
+                        </h1>
+                        <p class="mt-1 text-sm text-gray-500">
+                            Complete system administration, configuration, and monitoring
+                        </p>
+                    </div>
+                    <div class="mt-4 md:mt-0 md:ml-4 flex space-x-3">
+                        <div class="relative inline-block text-left">
+                            <button type="button"
+                                class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                                (click)="toggleExportMenu()">
+                                <svg class="-ml-1 mr-2 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg"
+                                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                                Export
+                                <svg class="-mr-1 ml-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
+                                    fill="currentColor">
+                                    <path fill-rule="evenodd"
+                                        d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                                        clip-rule="evenodd" />
+                                </svg>
+                            </button>
+                            <div class="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-10"
+                                [class.hidden]="!showExportMenu">
+                                <div class="py-1">
+                                    <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                        (click)="exportData('users'); $event.preventDefault()">
+                                        Export Users
+                                    </a>
+                                    <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                        (click)="exportData('logs'); $event.preventDefault()">
+                                        Export Logs
+                                    </a>
+                                    <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                        (click)="exportData('config'); $event.preventDefault()">
+                                        Export Config
+                                    </a>
+                                </div>
+                            </div>
+
+                        </div>
+                        <button type="button" (click)="restartSystem()"
+                            class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                            <svg class="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                            </svg>
+                            Restart System
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div class="border-b border-gray-200">
+                <nav class="-mb-px flex space-x-8">
+                    <button (click)="setActiveTab('dashboard')"
+                        [class]="activeTab === 'dashboard' 
+              ? 'border-indigo-500 text-indigo-600 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm'
+              : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm'">
+                        <svg class="-ml-0.5 mr-2 h-5 w-5 inline" xmlns="http://www.w3.org/2000/svg" fill="none"
+                            viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                        </svg>
+                        Dashboard
+                    </button>
+                    <button (click)="setActiveTab('users')"
+                        [class]="activeTab === 'users' 
+              ? 'border-indigo-500 text-indigo-600 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm'
+              : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm'">
+                        <svg class="-ml-0.5 mr-2 h-5 w-5 inline" xmlns="http://www.w3.org/2000/svg" fill="none"
+                            viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5 0a21.667 21.667 0 00-2.937-1.137M13.5 21a21.667 21.667 0 01-2.937 1.137" />
+                        </svg>
+                        System Users
+                    </button>
+                    <button (click)="setActiveTab('config')"
+                        [class]="activeTab === 'config' 
+              ? 'border-indigo-500 text-indigo-600 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm'
+              : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm'">
+                        <svg class="-ml-0.5 mr-2 h-5 w-5 inline" xmlns="http://www.w3.org/2000/svg" fill="none"
+                            viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                        Configuration
+                    </button>
+                    <button (click)="setActiveTab('logs')"
+                        [class]="activeTab === 'logs' 
+              ? 'border-indigo-500 text-indigo-600 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm'
+              : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm'">
+                        <svg class="-ml-0.5 mr-2 h-5 w-5 inline" xmlns="http://www.w3.org/2000/svg" fill="none"
+                            viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        System Logs
+                    </button>
+                    <button (click)="setActiveTab('backup')"
+                        [class]="activeTab === 'backup' 
+              ? 'border-indigo-500 text-indigo-600 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm'
+              : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm'">
+                        <svg class="-ml-0.5 mr-2 h-5 w-5 inline" xmlns="http://www.w3.org/2000/svg" fill="none"
+                            viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        Backup & Restore
+                    </button>
+                    <button (click)="setActiveTab('monitoring')"
+                        [class]="activeTab === 'monitoring' 
+              ? 'border-indigo-500 text-indigo-600 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm'
+              : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm'">
+                        <svg class="-ml-0.5 mr-2 h-5 w-5 inline" xmlns="http://www.w3.org/2000/svg" fill="none"
+                            viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                        </svg>
+                        Monitoring
+                    </button>
+                </nav>
+            </div>
+        </div>
+
+        <!-- Dashboard Tab -->
+        <div *ngIf="activeTab === 'dashboard'" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <!-- System Overview Cards -->
+            <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 mb-8">
+                <!-- Total Users -->
+                <div class="bg-white overflow-hidden shadow rounded-lg">
+                    <div class="p-5">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0 bg-blue-500 rounded-md p-3">
+                                <svg class="h-6 w-6 text-white" xmlns="http://www.w3.org/2000/svg" fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5 0a21.667 21.667 0 00-2.937-1.137M13.5 21a21.667 21.667 0 01-2.937 1.137" />
+                                </svg>
+                            </div>
+                            <div class="ml-5 w-0 flex-1">
+                                <dl>
+                                    <dt class="text-sm font-medium text-gray-500 truncate">Total Users</dt>
+                                    <dd class="text-lg font-medium text-gray-900">{{ totalUsers }}</dd>
+                                </dl>
+                            </div>
+                        </div>
+                        <div class="mt-4">
+                            <div class="text-sm text-gray-500">
+                                <span class="text-green-600 font-medium">{{ activeUsersCount }} active</span>
+                                <span class="mx-1">•</span>
+                                <span>{{ systemUsers.length - activeUsersCount }} inactive</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- System Health -->
+                <div class="bg-white overflow-hidden shadow rounded-lg">
+                    <div class="p-5">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0 bg-green-500 rounded-md p-3">
+                                <svg class="h-6 w-6 text-white" xmlns="http://www.w3.org/2000/svg" fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            </div>
+                            <div class="ml-5 w-0 flex-1">
+                                <dl>
+                                    <dt class="text-sm font-medium text-gray-500 truncate">System Health</dt>
+                                    <dd class="text-lg font-medium text-gray-900">{{ systemHealth.toFixed(1) }}%</dd>
+                                </dl>
+                            </div>
+                        </div>
+                        <div class="mt-4">
+                            <div class="flex items-center">
+                                <div class="w-full bg-gray-200 rounded-full h-2">
+                                    <div class="h-2 rounded-full" [ngClass]="{
+                      'bg-green-500': systemHealth >= 90,
+                      'bg-yellow-500': systemHealth >= 70 && systemHealth < 90,
+                      'bg-red-500': systemHealth < 70
+                    }" [style.width.%]="systemHealth"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Logs -->
+                <div class="bg-white overflow-hidden shadow rounded-lg">
+                    <div class="p-5">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0 bg-yellow-500 rounded-md p-3">
+                                <svg class="h-6 w-6 text-white" xmlns="http://www.w3.org/2000/svg" fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                            </div>
+                            <div class="ml-5 w-0 flex-1">
+                                <dl>
+                                    <dt class="text-sm font-medium text-gray-500 truncate">Recent Logs</dt>
+                                    <dd class="text-lg font-medium text-gray-900">{{ systemLogs.length }}</dd>
+                                </dl>
+                            </div>
+                        </div>
+                        <div class="mt-4">
+                            <div class="text-sm text-gray-500">
+                                <span class="text-red-600 font-medium">
+                                    {{ criticalLogCount }} critical
+                                </span>
+                                <span class="mx-1">•</span>
+                                <span class="text-orange-600">
+                                    {{ errorLogCount }} errors
+                                </span>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <!-- System Uptime -->
+                <div class="bg-white overflow-hidden shadow rounded-lg">
+                    <div class="p-5">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0 bg-purple-500 rounded-md p-3">
+                                <svg class="h-6 w-6 text-white" xmlns="http://www.w3.org/2000/svg" fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            </div>
+                            <div class="ml-5 w-0 flex-1">
+                                <dl>
+                                    <dt class="text-sm font-medium text-gray-500 truncate">System Uptime</dt>
+                                    <dd class="text-lg font-medium text-gray-900">99.98%</dd>
+                                </dl>
+                            </div>
+                        </div>
+                        <div class="mt-4">
+                            <div class="text-sm text-gray-500">
+                                Last restart: {{ lastRestartFormatted }}
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- System Metrics -->
+            <div class="bg-white shadow rounded-lg p-6 mb-8">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">System Performance Metrics</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div *ngFor="let metric of systemMetrics" class="border-l-4 border-indigo-500 bg-indigo-50 p-4">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="font-medium text-gray-900">{{ metric.name }}</span>
+                            <span class="text-sm font-semibold" [ngClass]="{
+                'text-green-600': metric.change >= 0 && metric.trend === 'up',
+                'text-red-600': metric.change < 0 || metric.trend === 'down'
+              }">
+                                {{ metric.change >= 0 ? '+' : '' }}{{ metric.change.toFixed(1) }}%
+                            </span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <span class="text-2xl font-bold text-gray-900">{{ metric.current.toLocaleString()
+                                    }}</span>
+                                <span class="text-sm text-gray-500 ml-2">{{ metric.unit }}</span>
+                            </div>
+                            <div class="text-sm text-gray-500">
+                                Target: {{ metric.target.toLocaleString() }}
+                            </div>
+                        </div>
+                        <div class="mt-2">
+                            <div class="h-2 bg-gray-200 rounded-full overflow-hidden">
+                                <div class="h-full bg-indigo-600"
+                                    [style.width.%]="(metric.current / metric.target) * 100"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- Recent Users -->
+                <div class="bg-white shadow rounded-lg p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-medium text-gray-900">Recent Users</h3>
+                        <button (click)="setActiveTab('users')" class="text-sm text-indigo-600 hover:text-indigo-900">
+                            View all →
+                        </button>
+                    </div>
+                    <div class="flow-root">
+                        <ul class="-my-5 divide-y divide-gray-200">
+                            <li *ngFor="let user of recentUsers" class="py-4">
+                                <div class="flex items-center space-x-4">
+                                    <div class="flex-shrink-0">
+                                        <div
+                                            class="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
+                                            <span class="text-gray-500 font-medium">{{ user.firstName.charAt(0) }}{{
+                                                user.lastName.charAt(0) }}</span>
+                                        </div>
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <p class="text-sm font-medium text-gray-900 truncate">
+                                            {{ user.firstName }} {{ user.lastName }}
+                                        </p>
+                                        <p class="text-sm text-gray-500 truncate">{{ user.username }}</p>
+                                    </div>
+                                    <div>
+                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full"
+                                            [ngClass]="getRoleColor(user.role)">
+                                            {{ getRoleLabel(user.role) }}
+                                        </span>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Recent Logs -->
+                <div class="bg-white shadow rounded-lg p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-medium text-gray-900">Recent System Logs</h3>
+                        <button (click)="setActiveTab('logs')" class="text-sm text-indigo-600 hover:text-indigo-900">
+                            View all →
+                        </button>
+                    </div>
+                    <div class="flow-root">
+                        <ul class="-my-5 divide-y divide-gray-200">
+                            <li *ngFor="let log of recentLogs" class="py-4">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex-1 min-w-0">
+                                        <p class="text-sm font-medium text-gray-900 truncate">
+                                            {{ log.message }}
+                                        </p>
+                                        <div class="flex items-center mt-1">
+                                            <span
+                                                class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full mr-2"
+                                                [ngClass]="getLevelColor(log.level)">
+                                                {{ getLevelLabel(log.level) }}
+                                            </span>
+                                            <span class="text-xs text-gray-500">{{ log.source }}</span>
+                                            <span class="text-xs text-gray-500 ml-2">{{ formatTimeAgo(log.timestamp)
+                                                }}</span>
+                                        </div>
+                                    </div>
+                                    <div class="ml-4 flex-shrink-0">
+                                        <span class="text-xs text-gray-400">{{ formatTime(log.timestamp) }}</span>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Users Management Tab -->
+        <div *ngIf="activeTab === 'users'" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div class="bg-white shadow rounded-lg">
+                <!-- Users Header -->
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-lg font-medium text-gray-900">System Users</h3>
+                            <p class="mt-1 text-sm text-gray-500">
+                                Manage user accounts, roles, and permissions
+                            </p>
+                        </div>
+                        <div class="flex space-x-3">
+                            <div class="relative">
+                                <input type="text" [(ngModel)]="userSearchQuery" (input)="filterUsers()"
+                                    placeholder="Search users..."
+                                    class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none"
+                                        viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                    </svg>
+                                </div>
+                            </div>
+                            <button (click)="openAddUserModal()"
+                                class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                <svg class="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 4v16m8-8H4" />
+                                </svg>
+                                Add User
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Users Table -->
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th scope="col"
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    User
+                                </th>
+                                <th scope="col"
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Role
+                                </th>
+                                <th scope="col"
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Status
+                                </th>
+                                <th scope="col"
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Last Active
+                                </th>
+                                <th scope="col"
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Actions
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            <tr *ngFor="let user of paginatedUsers">
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <div
+                                            class="flex-shrink-0 h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
+                                            <span class="text-gray-500 font-medium">{{ user.firstName.charAt(0) }}{{
+                                                user.lastName.charAt(0) }}</span>
+                                        </div>
+                                        <div class="ml-4">
+                                            <div class="text-sm font-medium text-gray-900">
+                                                {{ user.firstName }} {{ user.lastName }}
+                                            </div>
+                                            <div class="text-sm text-gray-500">{{ user.username }}</div>
+                                            <div class="text-sm text-gray-500">{{ user.email }}</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full"
+                                        [ngClass]="getRoleColor(user.role)">
+                                        {{ getRoleLabel(user.role) }}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full"
+                                        [ngClass]="getStatusColor(user.status)">
+                                        {{ getStatusLabel(user.status) }}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    {{ formatDateTime(user.lastLogin) }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                    <div class="flex space-x-2">
+                                        <button (click)="editUser(user)" class="text-indigo-600 hover:text-indigo-900">
+                                            Edit
+                                        </button>
+                                        <button (click)="toggleUserStatus(user)"
+                                            class="text-gray-600 hover:text-gray-900">
+                                            {{ user.status === 'active' ? 'Deactivate' : 'Activate' }}
+                                        </button>
+                                        <button (click)="deleteUser(user)" class="text-red-600 hover:text-red-900">
+                                            Delete
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                <div class="px-6 py-4 border-t border-gray-200">
+                    <div class="flex items-center justify-between">
+                        <div class="text-sm text-gray-700">
+                            Showing <span class="font-medium">{{ (currentPage - 1) * pageSize + 1 }}</span> to
+                            <span class="font-medium">{{ Math.min(currentPage * pageSize, filteredUsers.length)
+                                }}</span> of
+                            <span class="font-medium">{{ filteredUsers.length }}</span> users
+                        </div>
+                        <div class="flex space-x-2">
+                            <button (click)="prevPage()" [disabled]="currentPage === 1"
+                                class="px-3 py-1 rounded-md text-sm font-medium border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+                                Previous
+                            </button>
+                            <button (click)="nextPage()" [disabled]="currentPage * pageSize >= filteredUsers.length"
+                                class="px-3 py-1 rounded-md text-sm font-medium border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+                                Next
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Configuration Tab -->
+        <div *ngIf="activeTab === 'config'" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- System Settings -->
+                <div class="lg:col-span-2">
+                    <div class="bg-white shadow rounded-lg p-6">
+                        <h3 class="text-lg font-medium text-gray-900 mb-4">System Configuration</h3>
+                        <form [formGroup]="configForm" (ngSubmit)="saveConfig()">
+                            <div class="space-y-6">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                                        Application Name
+                                    </label>
+                                    <input type="text" formControlName="appName"
+                                        class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                                        API Base URL
+                                    </label>
+                                    <input type="url" formControlName="apiUrl"
+                                        class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
+                                </div>
+
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                                            Session Timeout (minutes)
+                                        </label>
+                                        <input type="number" formControlName="sessionTimeout"
+                                            class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                                            Max Login Attempts
+                                        </label>
+                                        <input type="number" formControlName="maxLoginAttempts"
+                                            class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
+                                    </div>
+                                </div>
+
+                                <div class="space-y-4">
+                                    <div class="flex items-center">
+                                        <input type="checkbox" formControlName="maintenanceMode"
+                                            class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded" />
+                                        <label class="ml-2 block text-sm text-gray-900">
+                                            Enable Maintenance Mode
+                                        </label>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <input type="checkbox" formControlName="enableAuditLog"
+                                            class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded" />
+                                        <label class="ml-2 block text-sm text-gray-900">
+                                            Enable Audit Logging
+                                        </label>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <input type="checkbox" formControlName="twoFactorAuth"
+                                            class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded" />
+                                        <label class="ml-2 block text-sm text-gray-900">
+                                            Require Two-Factor Authentication
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                                        System Announcement
+                                    </label>
+                                    <textarea formControlName="systemAnnouncement" rows="3"
+                                        class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                        placeholder="System-wide announcement message..."></textarea>
+                                </div>
+
+                                <div class="flex justify-end space-x-3">
+                                    <button type="button" (click)="resetConfig()"
+                                        class="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                        Reset
+                                    </button>
+                                    <button type="submit" [disabled]="!configForm.dirty"
+                                        class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed">
+                                        Save Changes
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Configuration Categories -->
+                <div class="space-y-6">
+                    <div class="bg-white shadow rounded-lg p-6">
+                        <h3 class="text-lg font-medium text-gray-900 mb-4">Quick Settings</h3>
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm text-gray-700">Email Notifications</span>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" [(ngModel)]="emailNotifications" class="sr-only peer">
+                                    <div
+                                        class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600">
+                                    </div>
+                                </label>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm text-gray-700">Auto Backup</span>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" [(ngModel)]="autoBackup" class="sr-only peer">
+                                    <div
+                                        class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600">
+                                    </div>
+                                </label>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm text-gray-700">Performance Monitoring</span>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" [(ngModel)]="performanceMonitoring" class="sr-only peer">
+                                    <div
+                                        class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600">
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white shadow rounded-lg p-6">
+                        <h3 class="text-lg font-medium text-gray-900 mb-4">System Information</h3>
+                        <dl class="space-y-3">
+                            <div class="flex justify-between">
+                                <dt class="text-sm text-gray-500">Version</dt>
+                                <dd class="text-sm font-medium text-gray-900">{{ systemInfo.version }}</dd>
+                            </div>
+                            <div class="flex justify-between">
+                                <dt class="text-sm text-gray-500">Environment</dt>
+                                <dd class="text-sm font-medium" [ngClass]="{
+                  'text-green-600': systemInfo.environment === 'production',
+                  'text-yellow-600': systemInfo.environment === 'staging',
+                  'text-blue-600': systemInfo.environment === 'development'
+                }">
+                                    {{ systemInfo.environment }}
+                                </dd>
+                            </div>
+                            <div class="flex justify-between">
+                                <dt class="text-sm text-gray-500">Last Updated</dt>
+                                <dd class="text-sm font-medium text-gray-900">{{ formatDateTime(systemInfo.lastUpdated)
+                                    }}</dd>
+                            </div>
+                            <div class="flex justify-between">
+                                <dt class="text-sm text-gray-500">Database Size</dt>
+                                <dd class="text-sm font-medium text-gray-900">{{ formatFileSize(systemInfo.databaseSize)
+                                    }}</dd>
+                            </div>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- System Logs Tab -->
+        <div *ngIf="activeTab === 'logs'" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div class="bg-white shadow rounded-lg">
+                <!-- Logs Header -->
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-lg font-medium text-gray-900">System Logs</h3>
+                            <p class="mt-1 text-sm text-gray-500">
+                                Monitor system activities and errors
+                            </p>
+                        </div>
+                        <div class="flex space-x-3">
+                            <div class="relative">
+                                <input type="text" [(ngModel)]="logSearchQuery" (input)="filterLogs()"
+                                    placeholder="Search logs..."
+                                    class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none"
+                                        viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                    </svg>
+                                </div>
+                            </div>
+                            <div class="relative">
+                                <select [(ngModel)]="logLevelFilter" (change)="filterLogs()"
+                                    class="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+                                    <option value="all">All Levels</option>
+                                    <option value="info">Info</option>
+                                    <option value="warning">Warning</option>
+                                    <option value="error">Error</option>
+                                    <option value="critical">Critical</option>
+                                </select>
+                            </div>
+                            <button (click)="clearLogs()"
+                                class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                Clear Logs
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Logs Table -->
+                <div class="overflow-x-auto max-h-96">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50 sticky top-0">
+                            <tr>
+                                <th scope="col"
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Time
+                                </th>
+                                <th scope="col"
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Level
+                                </th>
+                                <th scope="col"
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Source
+                                </th>
+                                <th scope="col"
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Message
+                                </th>
+                                <th scope="col"
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    User
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            <tr *ngFor="let log of paginatedLogs" class="hover:bg-gray-50">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    {{ formatTime(log.timestamp) }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full"
+                                        [ngClass]="getLevelColor(log.level)">
+                                        {{ getLevelLabel(log.level) }}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                    {{ log.source }}
+                                </td>
+                                <td class="px-6 py-4 text-sm text-gray-900">
+                                    {{ log.message }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    {{ log.userName || 'System' }}
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Log Stats -->
+                <div class="px-6 py-4 border-t border-gray-200 bg-gray-50">
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div class="text-center">
+                            <div class="text-sm text-gray-500">Total Logs</div>
+                            <div class="text-lg font-medium text-gray-900">{{ filteredLogs.length }}</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-sm text-gray-500">Errors</div>
+                            <div class="text-lg font-medium text-red-600">
+                                {{ errorLogCount }}
+                            </div>
+                        </div>
+
+                        <div class="text-center">
+                            <div class="text-sm text-gray-500">Warnings</div>
+                            <div class="text-lg font-medium text-yellow-600">
+                                {{ warningLogCount }}
+                            </div>
+                        </div>
+
+                        <div class="text-center">
+                            <div class="text-sm text-gray-500">Today</div>
+                            <div class="text-lg font-medium text-gray-900">{{ getTodayLogsCount() }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Backup & Restore Tab -->
+        <div *ngIf="activeTab === 'backup'" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Backup Section -->
+                <div class="bg-white shadow rounded-lg p-6">
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">Backup System</h3>
+                    <div class="space-y-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                Backup Name
+                            </label>
+                            <input type="text" [(ngModel)]="backupName"
+                                class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"
+                                [placeholder]="'backup-' + currentDateString" />
+
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                Include in Backup
+                            </label>
+                            <div class="space-y-2">
+                                <div class="flex items-center">
+                                    <input type="checkbox" [(ngModel)]="includeDatabase"
+                                        class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded" />
+                                    <label class="ml-2 block text-sm text-gray-900">
+                                        Database
+                                    </label>
+                                </div>
+                                <div class="flex items-center">
+                                    <input type="checkbox" [(ngModel)]="includeFiles"
+                                        class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded" />
+                                    <label class="ml-2 block text-sm text-gray-900">
+                                        Uploaded Files
+                                    </label>
+                                </div>
+                                <div class="flex items-center">
+                                    <input type="checkbox" [(ngModel)]="includeLogs"
+                                        class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded" />
+                                    <label class="ml-2 block text-sm text-gray-900">
+                                        System Logs
+                                    </label>
+                                </div>
+                                <div class="flex items-center">
+                                    <input type="checkbox" [(ngModel)]="includeConfig"
+                                        class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded" />
+                                    <label class="ml-2 block text-sm text-gray-900">
+                                        Configuration Files
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                Encryption
+                            </label>
+                            <select [(ngModel)]="encryptionType"
+                                class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                                <option value="none">No Encryption</option>
+                                <option value="aes-256">AES-256 Encryption</option>
+                                <option value="gpg">GPG Encryption</option>
+                            </select>
+                        </div>
+
+                        <div class="flex space-x-3">
+                            <button (click)="createBackup()" [disabled]="isCreatingBackup"
+                                class="flex-1 inline-flex justify-center items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed">
+                                <span *ngIf="isCreatingBackup" class="flex items-center">
+                                    <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                                        xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
+                                            stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor"
+                                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                                        </path>
+                                    </svg>
+                                    Creating Backup...
+                                </span>
+                                <span *ngIf="!isCreatingBackup">
+                                    Create Backup
+                                </span>
+                            </button>
+                            <button (click)="scheduleBackup()"
+                                class="flex-1 inline-flex justify-center items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                Schedule Backup
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Restore Section -->
+                <div class="bg-white shadow rounded-lg p-6">
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">Restore System</h3>
+                    <div class="space-y-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                Select Backup
+                            </label>
+                            <select [(ngModel)]="selectedBackup"
+                                class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                                <option *ngFor="let backup of backups" [value]="backup.id">
+                                    {{ backup.name }} ({{ formatDateTime(backup.createdAt) }})
+                                </option>
+                            </select>
+                        </div>
+
+                        <div *ngIf="selectedBackup" class="border border-gray-200 rounded-md p-4">
+                            <div class="space-y-2">
+                                <div class="flex justify-between">
+                                    <span class="text-sm text-gray-500">Size:</span>
+                                    <span class="text-sm font-medium text-gray-900">{{ getSelectedBackupSize() }}</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-sm text-gray-500">Created:</span>
+                                    <span class="text-sm font-medium text-gray-900">{{ getSelectedBackupDate() }}</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-sm text-gray-500">Type:</span>
+                                    <span class="text-sm font-medium text-gray-900">{{ getSelectedBackupType() }}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                Restore Options
+                            </label>
+                            <div class="space-y-2">
+                                <div class="flex items-center">
+                                    <input type="radio" [(ngModel)]="restoreOption" value="full"
+                                        class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300" />
+                                    <label class="ml-2 block text-sm text-gray-900">
+                                        Full System Restore
+                                    </label>
+                                </div>
+                                <div class="flex items-center">
+                                    <input type="radio" [(ngModel)]="restoreOption" value="database"
+                                        class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300" />
+                                    <label class="ml-2 block text-sm text-gray-900">
+                                        Database Only
+                                    </label>
+                                </div>
+                                <div class="flex items-center">
+                                    <input type="radio" [(ngModel)]="restoreOption" value="config"
+                                        class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300" />
+                                    <label class="ml-2 block text-sm text-gray-900">
+                                        Configuration Only
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="space-y-3">
+                            <button (click)="initiateRestore()" [disabled]="!selectedBackup"
+                                class="w-full inline-flex justify-center items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed">
+                                Restore System
+                            </button>
+                            <button (click)="downloadBackup()" [disabled]="!selectedBackup"
+                                class="w-full inline-flex justify-center items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed">
+                                Download Backup
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Backup History -->
+                <div class="lg:col-span-2">
+                    <div class="bg-white shadow rounded-lg p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-medium text-gray-900">Backup History</h3>
+                            <div class="text-sm text-gray-500">
+                                Total Storage Used: {{ calculateTotalStorage() }}
+                            </div>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th scope="col"
+                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Name
+                                        </th>
+                                        <th scope="col"
+                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Date
+                                        </th>
+                                        <th scope="col"
+                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Size
+                                        </th>
+                                        <th scope="col"
+                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Type
+                                        </th>
+                                        <th scope="col"
+                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Status
+                                        </th>
+                                        <th scope="col"
+                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Actions
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                    <tr *ngFor="let backup of backups">
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                            {{ backup.name }}
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            {{ formatDateTime(backup.createdAt) }}
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            {{ formatFileSize(backup.size) }}
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            {{ backup.type }}
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full"
+                                                [ngClass]="{
+                        'bg-green-100 text-green-800': backup.status === 'completed',
+                        'bg-yellow-100 text-yellow-800': backup.status === 'in_progress',
+                        'bg-red-100 text-red-800': backup.status === 'failed'
+                      }">
+                                                {{ backup.status }}
+                                            </span>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                            <div class="flex space-x-2">
+                                                <button (click)="restoreBackup(backup)"
+                                                    class="text-indigo-600 hover:text-indigo-900">
+                                                    Restore
+                                                </button>
+                                                <button (click)="deleteBackup(backup)"
+                                                    class="text-red-600 hover:text-red-900">
+                                                    Delete
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Monitoring Tab -->
+        <div *ngIf="activeTab === 'monitoring'" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <!-- Real-time Monitoring -->
+            <div class="bg-white shadow rounded-lg p-6 mb-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-medium text-gray-900">Real-time System Monitoring</h3>
+                    <div class="flex items-center space-x-2">
+                        <span class="text-sm text-gray-500">Refresh:</span>
+                        <select [(ngModel)]="refreshInterval" (change)="updateMonitoring()"
+                            class="text-sm border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500">
+                            <option value="5000">5 seconds</option>
+                            <option value="10000">10 seconds</option>
+                            <option value="30000">30 seconds</option>
+                            <option value="60000">1 minute</option>
+                        </select>
+                        <button (click)="toggleMonitoring()"
+                            class="inline-flex items-center px-3 py-1 border border-transparent text-sm font-medium rounded-md shadow-sm text-white"
+                            [ngClass]="isMonitoringActive ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700'">
+                            {{ isMonitoringActive ? 'Stop' : 'Start' }} Monitoring
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Resource Usage -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-sm font-medium text-gray-900">CPU Usage</span>
+                            <span class="text-sm font-bold" [ngClass]="{
+                'text-green-600': cpuUsage < 70,
+                'text-yellow-600': cpuUsage >= 70 && cpuUsage < 90,
+                'text-red-600': cpuUsage >= 90
+              }">
+                                {{ cpuUsage }}%
+                            </span>
+                        </div>
+                        <div class="h-2 bg-gray-200 rounded-full overflow-hidden">
+                            <div class="h-full" [ngClass]="{
+                  'bg-green-500': cpuUsage < 70,
+                  'bg-yellow-500': cpuUsage >= 70 && cpuUsage < 90,
+                  'bg-red-500': cpuUsage >= 90
+                }" [style.width.%]="cpuUsage"></div>
+                        </div>
+                    </div>
+
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-sm font-medium text-gray-900">Memory Usage</span>
+                            <span class="text-sm font-bold" [ngClass]="{
+                'text-green-600': memoryUsage < 70,
+                'text-yellow-600': memoryUsage >= 70 && memoryUsage < 90,
+                'text-red-600': memoryUsage >= 90
+              }">
+                                {{ memoryUsage }}%
+                            </span>
+                        </div>
+                        <div class="h-2 bg-gray-200 rounded-full overflow-hidden">
+                            <div class="h-full" [ngClass]="{
+                  'bg-green-500': memoryUsage < 70,
+                  'bg-yellow-500': memoryUsage >= 70 && memoryUsage < 90,
+                  'bg-red-500': memoryUsage >= 90
+                }" [style.width.%]="memoryUsage"></div>
+                        </div>
+                    </div>
+
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-sm font-medium text-gray-900">Disk Usage</span>
+                            <span class="text-sm font-bold" [ngClass]="{
+                'text-green-600': diskUsage < 70,
+                'text-yellow-600': diskUsage >= 70 && diskUsage < 90,
+                'text-red-600': diskUsage >= 90
+              }">
+                                {{ diskUsage }}%
+                            </span>
+                        </div>
+                        <div class="h-2 bg-gray-200 rounded-full overflow-hidden">
+                            <div class="h-full" [ngClass]="{
+                  'bg-green-500': diskUsage < 70,
+                  'bg-yellow-500': diskUsage >= 70 && diskUsage < 90,
+                  'bg-red-500': diskUsage >= 90
+                }" [style.width.%]="diskUsage"></div>
+                        </div>
+                    </div>
+
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-sm font-medium text-gray-900">Network I/O</span>
+                            <span class="text-sm font-bold text-gray-900">
+                                {{ networkIn }} MB/s
+                            </span>
+                        </div>
+                        <div class="h-2 bg-gray-200 rounded-full overflow-hidden">
+                            <div class="h-full bg-blue-500" [style.width.%]="Math.min(networkIn, 100)"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <h4 class="text-sm font-medium text-gray-900 mb-4">CPU Usage History</h4>
+                        <div class="h-48 flex items-end space-x-1">
+                            <div *ngFor="let usage of cpuHistory; let i = index"
+                                class="flex-1 bg-blue-500 hover:bg-blue-600 transition-all duration-300"
+                                [style.height.%]="usage" [title]="'CPU: ' + usage + '%'">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <h4 class="text-sm font-medium text-gray-900 mb-4">Memory Usage History</h4>
+                        <div class="h-48 flex items-end space-x-1">
+                            <div *ngFor="let usage of memoryHistory; let i = index"
+                                class="flex-1 bg-green-500 hover:bg-green-600 transition-all duration-300"
+                                [style.height.%]="usage" [title]="'Memory: ' + usage + '%'">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Active Connections -->
+            <div class="bg-white shadow rounded-lg p-6">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Active Connections</h3>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th scope="col"
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    IP Address
+                                </th>
+                                <th scope="col"
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    User Agent
+                                </th>
+                                <th scope="col"
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Connected At
+                                </th>
+                                <th scope="col"
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Last Activity
+                                </th>
+                                <th scope="col"
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Actions
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            <tr *ngFor="let connection of activeConnections">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                    {{ connection.ip }}
+                                </td>
+                                <td class="px-6 py-4 text-sm text-gray-500">
+                                    <span class="truncate max-w-xs block">{{ connection.userAgent }}</span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    {{ formatTime(connection.connectedAt) }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    {{ formatTimeAgo(connection.lastActivity) }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                    <button (click)="terminateConnection(connection)"
+                                        class="text-red-600 hover:text-red-900">
+                                        Terminate
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </app-dashboard-layout>
+</div>

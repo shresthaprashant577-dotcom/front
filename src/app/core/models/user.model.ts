@@ -7,11 +7,7 @@ export interface User {
   role: UserRole;
   phoneNumber: string;
   address: string;
-  city: string;
-  state: string;
-  zipCode: string;
   dateOfBirth: Date;
-  ssn: string; // Social Security Number (masked)
   createdAt: Date;
   updatedAt: Date;
   lastLogin: Date | null;
@@ -20,6 +16,7 @@ export interface User {
   branchId?: string;
   employeeId?: string;
   customerId?: string;
+  branchName?: string;
 }
 
 export type UserRole = 'Admin' | 'Manager' | 'Teller' | 'Customer';
@@ -39,15 +36,12 @@ export interface RegisterRequest {
   username: string;
   email: string;
   password: string;
+  confirmPassword: string;
   firstName: string;
   lastName: string;
   phoneNumber: string;
   dateOfBirth: Date;
-  ssn: string;
   address: string;
-  city: string;
-  state: string;
-  zipCode: string;
 }
 
 export interface PasswordChangeRequest {

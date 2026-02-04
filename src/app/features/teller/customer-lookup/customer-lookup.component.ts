@@ -1,10 +1,15 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { RouterModule } from '@angular/router';
 import { DashboardLayoutComponent } from '../../../shared/layouts/dashboard-layout/dashboard-layout.component';
 import { DataTableComponent, TableColumn } from '../../../shared/components/data-table/data-table.component';
-import { MockAuthService } from '../../../core/services/implementations/mock-auth.service';
-import { MockDataGenerator } from '../../../core/services/mock-data/mock-data-generator.service';
+
+import { AuthService } from '../../../core/services/implementations/auth.service';
+import { AccountService } from '../../../core/services/implementations/account.service';
+import { CustomerService } from '../../../core/services/implementations/customer.service';
+import { NotificationService } from '../../../core/services/implementations/notification.service';
+
 import { User } from '../../../core/models/user.model';
 import { Account } from '../../../core/models/account.model';
 
@@ -14,27 +19,29 @@ import { Account } from '../../../core/models/account.model';
   imports: [
     CommonModule,
     FormsModule,
+    RouterModule,
     DashboardLayoutComponent,
     DataTableComponent
   ],
   templateUrl: './customer-lookup.component.html',
 })
 export class CustomerLookupComponent implements OnInit {
-  private authService = inject(MockAuthService);
-  private mockData = inject(MockDataGenerator);
-  
+  private authService = inject(AuthService);
+  private accountService = inject(AccountService);
+  private customerService = inject(CustomerService);
+  private notificationService = inject(NotificationService);
+
   currentUser = signal<User | null>(null);
   allCustomers = signal<User[]>([]);
   filteredCustomers = signal<User[]>([]);
   selectedCustomer = signal<User | null>(null);
   customerAccounts = signal<Account[]>([]);
   isLoading = signal(false);
-  
+
   // Search filters
   searchType = signal<'id' | 'name' | 'account' | 'phone' | 'email'>('id');
   searchQuery = signal('');
-  searchResults = signal<any[]>([]);
-  
+
   // Customer table columns
   customerColumns: TableColumn[] = [
     { key: 'customerId', label: 'Customer ID', sortable: true },
@@ -44,7 +51,7 @@ export class CustomerLookupComponent implements OnInit {
     { key: 'phoneNumber', label: 'Phone', sortable: true },
     { key: 'status', label: 'Status', sortable: true, format: 'badge' }
   ];
-  
+
   // Account table columns
   accountColumns: TableColumn[] = [
     { key: 'accountNumber', label: 'Account Number', sortable: true },
@@ -53,7 +60,7 @@ export class CustomerLookupComponent implements OnInit {
     { key: 'status', label: 'Status', sortable: true, format: 'badge' },
     { key: 'openingDate', label: 'Opened', sortable: true, format: 'date' }
   ];
-  
+
   searchTypes = [
     { value: 'id', label: 'Customer ID' },
     { value: 'name', label: 'Customer Name' },
@@ -61,97 +68,127 @@ export class CustomerLookupComponent implements OnInit {
     { value: 'phone', label: 'Phone Number' },
     { value: 'email', label: 'Email Address' }
   ];
-  
+
+  readonly Math = Math;
+
   ngOnInit() {
-    this.loadUserData();
+    this.loadCurrentUser();
     this.loadCustomers();
   }
-  
-  loadUserData() {
-    this.authService.getCurrentUser().subscribe(user => {
-      this.currentUser.set(user);
+
+  // =====================
+  // LOAD CURRENT USER
+  // =====================
+  loadCurrentUser() {
+    this.authService.currentUser$.subscribe({
+      next: (user: User | null) => this.currentUser.set(user),
+      error: () => this.notificationService.error('Error', 'Failed to fetch current user')
     });
   }
-  
+
+  // =====================
+  // LOAD CUSTOMERS
+  // =====================
   loadCustomers() {
     this.isLoading.set(true);
-    
-    // Get all customers from mock data
-    const customers = this.mockData.getUsers()
-      .filter(user => user.role === 'Customer')
-      .slice(0, 50); // Limit for performance
-    
-    this.allCustomers.set(customers);
-    this.filteredCustomers.set(customers);
-    
-    this.isLoading.set(false);
+    this.customerService.getCustomers().subscribe({
+      next: ({ data, total }) => {
+        const filtered = data.filter(c => c.role === 'Customer').slice(0, 50);
+        this.allCustomers.set(filtered);
+        this.filteredCustomers.set(filtered);
+        this.isLoading.set(false);
+      },
+      error: () => {
+        this.notificationService.error('Error', 'Failed to load customers');
+        this.isLoading.set(false);
+      }
+    });
+
+
   }
-  
+
+  // =====================
+  // SEARCH
+  // =====================
   searchCustomers() {
     const query = this.searchQuery().toLowerCase().trim();
     if (!query) {
       this.filteredCustomers.set(this.allCustomers());
       return;
     }
-    
+
     this.isLoading.set(true);
-    
-    setTimeout(() => {
-      let results: User[] = [];
-      
-      switch (this.searchType()) {
-        case 'id':
-          results = this.allCustomers().filter(customer =>
-            customer.customerId?.toLowerCase().includes(query) ||
-            customer.id.toLowerCase().includes(query)
-          );
-          break;
-          
-        case 'name':
-          results = this.allCustomers().filter(customer =>
-            customer.firstName.toLowerCase().includes(query) ||
-            customer.lastName.toLowerCase().includes(query) ||
-            `${customer.firstName} ${customer.lastName}`.toLowerCase().includes(query)
-          );
-          break;
-          
-        case 'account':
-          // Search by account number
-          const accountResults = this.mockData.getAccounts()
-            .filter(account => account.accountNumber.toLowerCase().includes(query))
-            .map(account => account.userId);
-          
-          results = this.allCustomers().filter(customer =>
-            accountResults.includes(customer.id)
-          );
-          break;
-          
-        case 'phone':
-          results = this.allCustomers().filter(customer =>
-            customer.phoneNumber.toLowerCase().includes(query)
-          );
-          break;
-          
-        case 'email':
-          results = this.allCustomers().filter(customer =>
-            customer.email.toLowerCase().includes(query)
-          );
-          break;
-      }
-      
-      this.filteredCustomers.set(results);
-      this.isLoading.set(false);
-    }, 300);
+
+    switch (this.searchType()) {
+      case 'id':
+        this.filteredCustomers.set(
+          this.allCustomers().filter(c =>
+            c.customerId?.toLowerCase().includes(query) ||
+            c.id.toLowerCase().includes(query)
+          )
+        );
+        this.isLoading.set(false);
+        break;
+
+      case 'name':
+        this.filteredCustomers.set(
+          this.allCustomers().filter(c =>
+            c.firstName.toLowerCase().includes(query) ||
+            c.lastName.toLowerCase().includes(query) ||
+            `${c.firstName} ${c.lastName}`.toLowerCase().includes(query)
+          )
+        );
+        this.isLoading.set(false);
+        break;
+
+      case 'account':
+        this.accountService.getAccounts().subscribe({
+          next: ({ data: accounts }) => {
+            const matchingUserIds = accounts
+              .filter(acc => acc.accountNumber.toLowerCase().includes(query))
+              .map(acc => acc.userId);
+            const results = this.allCustomers().filter(c => matchingUserIds.includes(c.id));
+            this.filteredCustomers.set(results);
+            this.isLoading.set(false);
+          },
+          error: () => {
+            this.notificationService.error('Error', 'Failed to fetch accounts');
+            this.isLoading.set(false);
+          }
+        });
+        break;
+
+      case 'phone':
+        this.filteredCustomers.set(
+          this.allCustomers().filter(c => c.phoneNumber?.toLowerCase().includes(query))
+        );
+        this.isLoading.set(false);
+        break;
+
+      case 'email':
+        this.filteredCustomers.set(
+          this.allCustomers().filter(c => c.email?.toLowerCase().includes(query))
+        );
+        this.isLoading.set(false);
+        break;
+    }
   }
-  
+
+  // =====================
+  // SELECT CUSTOMER
+  // =====================
   selectCustomer(customer: User) {
     this.selectedCustomer.set(customer);
-    
-    // Load customer accounts
-    const accounts = this.mockData.getAccountsByUserId(customer.id);
-    this.customerAccounts.set(accounts);
+    this.loadCustomerAccounts(customer.id);
   }
-  
+
+  loadCustomerAccounts(customerId: string) {
+    this.accountService.getCustomerAccounts(customerId).subscribe({
+      next: (accounts: Account[]) => this.customerAccounts.set(accounts),
+      error: () => this.notificationService.error('Error', 'Failed to load accounts')
+    });
+  }
+
   clearSearch() {
     this.searchQuery.set('');
     this.searchType.set('id');
@@ -159,22 +196,25 @@ export class CustomerLookupComponent implements OnInit {
     this.selectedCustomer.set(null);
     this.customerAccounts.set([]);
   }
-  
+
+  // =====================
+  // HELPERS
+  // =====================
   formatCurrency(amount: number): string {
-    return new Intl.NumberFormat('en-US', {
+    return new Intl.NumberFormat('en-NP', {
       style: 'currency',
-      currency: 'USD'
+      currency: 'NPR'
     }).format(amount);
   }
-  
+
   getCustomerStatus(customer: User): string {
     return customer.isActive ? 'Active' : 'Inactive';
   }
-  
+
   getCustomerStatusColor(customer: User): string {
     return customer.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
   }
-  
+
   getAccountTypeColor(type: string): string {
     const colors: Record<string, string> = {
       'Checking': 'bg-blue-100 text-blue-800',
@@ -186,7 +226,7 @@ export class CustomerLookupComponent implements OnInit {
     };
     return colors[type] || 'bg-gray-100 text-gray-800';
   }
-  
+
   getAccountStatusColor(status: string): string {
     const colors: Record<string, string> = {
       'Active': 'bg-green-100 text-green-800',
@@ -197,29 +237,34 @@ export class CustomerLookupComponent implements OnInit {
     };
     return colors[status] || 'bg-gray-100 text-gray-800';
   }
-  
-  formatDate(date: Date): string {
+
+  formatDate(date: Date | string | null | undefined): string {
+    if (!date) return 'Never';
     return new Date(date).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'short',
       day: 'numeric'
     });
   }
-  
+
   getCustomerSummary(): any {
     const customer = this.selectedCustomer();
     if (!customer) return null;
-    
+
     const accounts = this.customerAccounts();
     const totalBalance = accounts.reduce((sum, acc) => sum + acc.balance, 0);
     const activeAccounts = accounts.filter(acc => acc.status === 'Active').length;
-    
+
     return {
       totalBalance,
       activeAccounts,
       totalAccounts: accounts.length,
       memberSince: this.formatDate(customer.createdAt),
-      lastLogin: customer.lastLogin ? this.formatDate(customer.lastLogin) : 'Never'
+      lastLogin: this.formatDate(customer.lastLogin)
     };
+  }
+
+  getActiveCustomersCount(): number {
+    return this.allCustomers().filter(c => c.isActive).length;
   }
 }

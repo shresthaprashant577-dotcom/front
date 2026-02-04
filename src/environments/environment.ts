@@ -1,10 +1,10 @@
+// environments/environment.ts
 export const environment = {
   production: false,
-  apiUrl: 'http://localhost:3000/api',
-  mock: {
-    enabled: true,
-    delay: 500, // Base delay in ms
-    simulateErrors: false, // Set to true to enable random errors
-    errorRate: 0.1 // 10% chance of error when simulateErrors is true
-  }
+  apiUrl: 'http://localhost:5113/api', // Your .NET API URL
+  tokenKey: 'banking_auth_token',
+  refreshTokenKey: 'banking_refresh_token',
+  userKey: 'banking_user_data',
+  timeout: 30000
 };
+

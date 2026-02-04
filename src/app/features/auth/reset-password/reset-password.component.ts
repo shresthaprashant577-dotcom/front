@@ -2,7 +2,7 @@ import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute, RouterLink } from '@angular/router';
-import { MockAuthService } from '../../../core/services/implementations/mock-auth.service';
+import { AuthService } from '../../../core/services/implementations/auth.service';
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
 
 @Component({
@@ -12,7 +12,7 @@ import { LoadingSpinnerComponent } from '../../../shared/components/loading-spin
   templateUrl: './reset-password.component.html',
 })
 export class ResetPasswordComponent implements OnInit {
-  private authService = inject(MockAuthService);
+  private authService = inject(AuthService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   

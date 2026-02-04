@@ -1,0 +1,786 @@
+<div class="p-6 bg-gray-50 min-h-screen">
+  <!-- Header Section -->
+  <div class="mb-8">
+    <div class="flex justify-between items-center">
+      <div>
+        <h1 class="text-3xl font-bold text-gray-900">Teller Management</h1>
+        <p class="text-gray-600 mt-1">Manage tellers, monitor cash levels, and track transactions</p>
+      </div>
+      <div class="flex gap-3">
+        <button class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium">
+          <i class="fas fa-plus mr-2"></i>
+          Add New Teller
+        </button>
+        <button class="px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 font-medium">
+          <i class="fas fa-print mr-2"></i>
+          Generate Report
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Statistics Cards -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+    <div class="bg-white p-5 rounded-xl shadow-sm border">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-sm text-gray-500">Total Tellers</p>
+          <h3 class="text-2xl font-bold text-gray-900 mt-1">{{totalTellers}}</h3>
+        </div>
+        <div class="bg-blue-50 p-3 rounded-lg">
+          <i class="fas fa-users text-blue-600 text-xl"></i>
+        </div>
+      </div>
+      <p class="text-sm text-green-600 mt-2">
+        <i class="fas fa-arrow-up mr-1"></i>
+        {{activeTellers}} active
+      </p>
+    </div>
+
+    <div class="bg-white p-5 rounded-xl shadow-sm border">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-sm text-gray-500">Total Cash in Drawers</p>
+          <h3 class="text-2xl font-bold text-gray-900 mt-1">{{formatCurrency(totalCash)}}</h3>
+        </div>
+        <div class="bg-green-50 p-3 rounded-lg">
+          <i class="fas fa-money-bill-wave text-green-600 text-xl"></i>
+        </div>
+      </div>
+      <p class="text-sm text-gray-600 mt-2">Across all branches</p>
+    </div>
+
+    <div class="bg-white p-5 rounded-xl shadow-sm border">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-sm text-gray-500">Today's Transactions</p>
+          <h3 class="text-2xl font-bold text-gray-900 mt-1">{{totalTransactions}}</h3>
+        </div>
+        <div class="bg-purple-50 p-3 rounded-lg">
+          <i class="fas fa-exchange-alt text-purple-600 text-xl"></i>
+        </div>
+      </div>
+      <p class="text-sm text-gray-600 mt-2">Average per teller: {{Math.round(totalTransactions / (totalTellers || 1))}}</p>
+    </div>
+
+    <div class="bg-white p-5 rounded-xl shadow-sm border">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-sm text-gray-500">Average Performance</p>
+          <h3 class="text-2xl font-bold text-gray-900 mt-1">{{averagePerformance}}%</h3>
+        </div>
+        <div class="bg-yellow-50 p-3 rounded-lg">
+          <i class="fas fa-chart-line text-yellow-600 text-xl"></i>
+        </div>
+      </div>
+      <div class="w-full bg-gray-200 rounded-full h-2 mt-3">
+        <div class="bg-green-600 h-2 rounded-full" [style.width.%]="averagePerformance"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filters Section -->
+  <div class="bg-white rounded-xl shadow-sm border p-6 mb-6">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <!-- Search -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">Search Tellers</label>
+        <div class="relative">
+          <input
+            type="text"
+            [(ngModel)]="searchTerm"
+            (ngModelChange)="applyFilters()"
+            placeholder="Search by name, ID, or email..."
+            class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          >
+          <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+        </div>
+      </div>
+
+      <!-- Branch Filter -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">Branch</label>
+        <select
+          [(ngModel)]="selectedBranch"
+          (ngModelChange)="applyFilters()"
+          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+        >
+          <option value="all">All Branches</option>
+          <option *ngFor="let branch of branches" [value]="branch">{{branch}}</option>
+        </select>
+      </div>
+
+      <!-- Status Filter -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
+        <select
+          [(ngModel)]="selectedStatus"
+          (ngModelChange)="applyFilters()"
+          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+        >
+          <option value="all">All Statuses</option>
+          <option *ngFor="let status of statuses" [value]="status.value">{{status.label}}</option>
+        </select>
+      </div>
+
+      <!-- Shift Filter -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">Shift</label>
+        <select
+          [(ngModel)]="selectedShift"
+          (ngModelChange)="applyFilters()"
+          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+        >
+          <option value="all">All Shifts</option>
+          <option *ngFor="let shift of shifts" [value]="shift.value">{{shift.label}}</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tellers Table -->
+  <div class="bg-white rounded-xl shadow-sm border overflow-hidden mb-8">
+    <div class="px-6 py-4 border-b">
+      <h2 class="text-lg font-semibold text-gray-900">Teller List ({{filteredTellers.length}})</h2>
+    </div>
+    
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Teller Details
+            </th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Branch & Shift
+            </th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Cash Status
+            </th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Performance
+            </th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Actions
+            </th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+          <tr *ngFor="let teller of paginatedTellers" class="hover:bg-gray-50">
+            <!-- Teller Details -->
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="flex items-center">
+                <div class="flex-shrink-0 h-10 w-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                  <i class="fas fa-user text-blue-600"></i>
+                </div>
+                <div class="ml-4">
+                  <div class="text-sm font-medium text-gray-900">{{teller.name}}</div>
+                  <div class="text-sm text-gray-500">ID: {{teller.tellerId}}</div>
+                  <div class="text-xs text-gray-400">{{teller.email}}</div>
+                </div>
+              </div>
+            </td>
+
+            <!-- Branch & Shift -->
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="text-sm text-gray-900">{{teller.branch}}</div>
+              <div class="text-sm text-gray-500 mt-1">{{getShiftLabel(teller.shift)}}</div>
+              <div class="mt-2">
+                <span [class]="'px-2 py-1 rounded-full text-xs font-medium ' + getStatusColor(teller.status)">
+                  {{getStatusLabel(teller.status)}}
+                </span>
+              </div>
+            </td>
+
+            <!-- Cash Status -->
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="text-sm font-medium text-gray-900">{{formatCurrency(teller.currentCash)}}</div>
+              <div class="text-sm text-gray-500">Limit: {{formatCurrency(teller.cashLimit)}}</div>
+              <div class="w-full bg-gray-200 rounded-full h-2 mt-2">
+                <div 
+                  [class]="'h-2 rounded-full ' + 
+                    (teller.currentCash / teller.cashLimit > 0.8 ? 'bg-red-500' : 
+                     teller.currentCash / teller.cashLimit > 0.5 ? 'bg-yellow-500' : 'bg-green-500')"
+                  [style.width.%]="(teller.currentCash / teller.cashLimit) * 100"
+                ></div>
+              </div>
+              <div class="text-xs text-gray-500 mt-1">
+                {{teller.transactionsToday}} transactions today
+              </div>
+            </td>
+
+            <!-- Performance -->
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="flex items-center">
+                <div class="text-sm font-medium text-gray-900 mr-3">{{teller.performanceScore}}%</div>
+                <div class="relative pt-1 w-24">
+                  <div class="overflow-hidden h-2 text-xs flex rounded bg-gray-200">
+                    <div 
+                      [class]="'shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center ' + 
+                        (teller.performanceScore >= 90 ? 'bg-green-500' : 
+                         teller.performanceScore >= 80 ? 'bg-yellow-500' : 'bg-red-500')"
+                      [style.width.%]="teller.performanceScore"
+                    ></div>
+                  </div>
+                </div>
+              </div>
+              <div class="text-xs text-gray-500 mt-2">
+                Last transaction: {{teller.lastTransaction ? formatTimeAgo(teller.lastTransaction) : 'N/A'}}
+              </div>
+            </td>
+
+            <!-- Actions -->
+            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+              <div class="flex flex-col space-y-2">
+                <button 
+                  (click)="viewTellerDetails(teller)"
+                  class="text-blue-600 hover:text-blue-900 text-left"
+                >
+                  <i class="fas fa-eye mr-1"></i> View Details
+                </button>
+                <button 
+                  (click)="openCashAdjustment(teller)"
+                  class="text-green-600 hover:text-green-900 text-left"
+                >
+                  <i class="fas fa-money-bill-wave mr-1"></i> Adjust Cash
+                </button>
+                <div class="relative group">
+                  <button class="text-gray-600 hover:text-gray-900 text-left">
+                    <i class="fas fa-cog mr-1"></i> Manage
+                  </button>
+                  <div class="absolute left-0 mt-1 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-10 hidden group-hover:block">
+                    <div class="py-1">
+                      <button 
+                        (click)="changeTellerStatus(teller, 'active')"
+                        class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      >
+                        Set as Active
+                      </button>
+                      <button 
+                        (click)="changeTellerStatus(teller, 'on_break')"
+                        class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      >
+                        Set as On Break
+                      </button>
+                      <button 
+                        (click)="changeTellerStatus(teller, 'training')"
+                        class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      >
+                        Set as Training
+                      </button>
+                      <button 
+                        (click)="changeTellerStatus(teller, 'inactive')"
+                        class="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+                      >
+                        Set as Inactive
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- No Results -->
+    <div *ngIf="filteredTellers.length === 0" class="text-center py-12">
+      <i class="fas fa-user-slash text-gray-300 text-4xl mb-4"></i>
+      <h3 class="text-lg font-medium text-gray-900 mb-2">No tellers found</h3>
+      <p class="text-gray-500">Try adjusting your filters or search terms</p>
+    </div>
+
+    <!-- Pagination -->
+    <div *ngIf="filteredTellers.length > 0" class="px-6 py-4 border-t">
+      <div class="flex items-center justify-between">
+        <div class="text-sm text-gray-700">
+          Showing <span class="font-medium">{{(currentPage - 1) * itemsPerPage + 1}}</span> to 
+          <span class="font-medium">{{Math.min(currentPage * itemsPerPage, filteredTellers.length)}}</span> of 
+          <span class="font-medium">{{filteredTellers.length}}</span> tellers
+        </div>
+        <div class="flex items-center space-x-2">
+          <button 
+            (click)="changePage(currentPage - 1)"
+            [disabled]="currentPage === 1"
+            [class]="'px-3 py-2 rounded-lg border ' + 
+              (currentPage === 1 ? 'bg-gray-50 text-gray-400 cursor-not-allowed' : 
+               'bg-white text-gray-700 hover:bg-gray-50')"
+          >
+            <i class="fas fa-chevron-left"></i>
+          </button>
+          
+          <button 
+            *ngFor="let page of getPageNumbers()"
+            (click)="changePage(page)"
+            [class]="'px-3 py-2 rounded-lg border ' + 
+              (currentPage === page ? 'bg-blue-600 text-white border-blue-600' : 
+               'bg-white text-gray-700 hover:bg-gray-50')"
+          >
+            {{page}}
+          </button>
+          
+          <button 
+            (click)="changePage(currentPage + 1)"
+            [disabled]="currentPage === totalPages"
+            [class]="'px-3 py-2 rounded-lg border ' + 
+              (currentPage === totalPages ? 'bg-gray-50 text-gray-400 cursor-not-allowed' : 
+               'bg-white text-gray-700 hover:bg-gray-50')"
+          >
+            <i class="fas fa-chevron-right"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent Transactions Section -->
+  <div class="bg-white rounded-xl shadow-sm border overflow-hidden">
+    <div class="px-6 py-4 border-b flex justify-between items-center">
+      <h2 class="text-lg font-semibold text-gray-900">Recent Transactions</h2>
+      <button 
+        (click)="resetTransactionFilters()"
+        class="text-sm text-blue-600 hover:text-blue-800"
+      >
+        View All Transactions
+      </button>
+    </div>
+    
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Transaction
+            </th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Teller & Customer
+            </th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Amount
+            </th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Status
+            </th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Time
+            </th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+          <tr *ngFor="let transaction of filteredTransactions" class="hover:bg-gray-50">
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="text-sm font-medium text-gray-900">
+                {{transaction.transactionType.replace('_', ' ') | titlecase}}
+              </div>
+              <div class="text-sm text-gray-500">Ref: {{transaction.referenceNumber}}</div>
+            </td>
+            <td class="px-6 py-4">
+              <div class="text-sm text-gray-900">{{transaction.tellerName}}</div>
+              <div class="text-sm text-gray-500">{{transaction.customerName}}</div>
+              <div class="text-xs text-gray-400">Acct: {{transaction.customerAccount}}</div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="text-lg font-semibold" 
+                   [class]="transaction.transactionType === 'withdrawal' ? 'text-red-600' : 'text-green-600'">
+                {{formatCurrency(transaction.amount)}}
+              </div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <span [class]="'px-2 py-1 rounded-full text-xs font-medium ' + getTransactionStatusColor(transaction.status)">
+                {{transaction.status | titlecase}}
+              </span>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="text-sm text-gray-900">{{formatDateTime(transaction.timestamp)}}</div>
+              <div class="text-xs text-gray-500">{{formatTimeAgo(transaction.timestamp)}}</div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Teller Details Modal -->
+  <div *ngIf="showTellerDetails && selectedTeller" class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center p-4 z-50">
+    <div class="bg-white rounded-xl shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+      <div class="p-6">
+        <div class="flex justify-between items-center mb-6">
+          <div>
+            <h3 class="text-2xl font-bold text-gray-900">{{selectedTeller.name}}</h3>
+            <p class="text-gray-600">Teller ID: {{selectedTeller.tellerId}}</p>
+          </div>
+          <button (click)="closeTellerDetails()" class="text-gray-400 hover:text-gray-600">
+            <i class="fas fa-times text-2xl"></i>
+          </button>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <!-- Personal Information -->
+          <div>
+            <h4 class="text-lg font-semibold text-gray-900 mb-4">Personal Information</h4>
+            <div class="space-y-4">
+              <div>
+                <label class="text-sm text-gray-500">Email</label>
+                <p class="font-medium">{{selectedTeller.email}}</p>
+              </div>
+              <div>
+                <label class="text-sm text-gray-500">Phone</label>
+                <p class="font-medium">{{selectedTeller.phone}}</p>
+              </div>
+              <div>
+                <label class="text-sm text-gray-500">Branch</label>
+                <p class="font-medium">{{selectedTeller.branch}} ({{selectedTeller.branchCode}})</p>
+              </div>
+              <div>
+                <label class="text-sm text-gray-500">Supervisor</label>
+                <p class="font-medium">{{selectedTeller.supervisor}}</p>
+              </div>
+              <div>
+                <label class="text-sm text-gray-500">Joined Date</label>
+                <p class="font-medium">{{formatDate(selectedTeller.createdAt)}}</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Work Information -->
+          <div>
+            <h4 class="text-lg font-semibold text-gray-900 mb-4">Work Information</h4>
+            <div class="space-y-4">
+              <div class="flex items-center justify-between">
+                <div>
+                  <label class="text-sm text-gray-500">Status</label>
+                  <p class="font-medium">
+                    <span [class]="'px-2 py-1 rounded-full text-xs font-medium ' + getStatusColor(selectedTeller.status)">
+                      {{getStatusLabel(selectedTeller.status)}}
+                    </span>
+                  </p>
+                </div>
+                <div>
+                  <label class="text-sm text-gray-500">Shift</label>
+                  <p class="font-medium">{{getShiftLabel(selectedTeller.shift)}}</p>
+                </div>
+              </div>
+              
+              <div>
+                <label class="text-sm text-gray-500">Performance Score</label>
+                <div class="flex items-center mt-1">
+                  <div class="text-2xl font-bold mr-4">{{selectedTeller.performanceScore}}%</div>
+                  <div class="flex-1">
+                    <div class="w-full bg-gray-200 rounded-full h-3">
+                      <div 
+                        [class]="'h-3 rounded-full ' + 
+                          (selectedTeller.performanceScore >= 90 ? 'bg-green-500' : 
+                           selectedTeller.performanceScore >= 80 ? 'bg-yellow-500' : 'bg-red-500')"
+                        [style.width.%]="selectedTeller.performanceScore"
+                      ></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div>
+                <label class="text-sm text-gray-500">Today's Statistics</label>
+                <div class="grid grid-cols-2 gap-4 mt-2">
+                  <div class="bg-blue-50 p-3 rounded-lg">
+                    <div class="text-sm text-gray-600">Transactions</div>
+                    <div class="text-xl font-bold">{{selectedTeller.transactionsToday}}</div>
+                  </div>
+                  <div class="bg-green-50 p-3 rounded-lg">
+                    <div class="text-sm text-gray-600">Last Activity</div>
+                    <div class="text-sm font-medium">{{selectedTeller.lastTransaction ? formatTimeAgo(selectedTeller.lastTransaction) : 'N/A'}}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Cash Management -->
+          <div>
+            <h4 class="text-lg font-semibold text-gray-900 mb-4">Cash Management</h4>
+            <div class="space-y-4">
+              <div>
+                <label class="text-sm text-gray-500">Current Cash</label>
+                <div class="text-3xl font-bold text-green-600">{{formatCurrency(selectedTeller.currentCash)}}</div>
+              </div>
+              
+              <div>
+                <label class="text-sm text-gray-500">Cash Limit</label>
+                <p class="font-medium">{{formatCurrency(selectedTeller.cashLimit)}}</p>
+              </div>
+              
+              <div>
+                <label class="text-sm text-gray-500">Cash Usage</label>
+                <div class="w-full bg-gray-200 rounded-full h-4 mt-2">
+                  <div 
+                    [class]="'h-4 rounded-full ' + 
+                      (selectedTeller.currentCash / selectedTeller.cashLimit > 0.8 ? 'bg-red-500' : 
+                       selectedTeller.currentCash / selectedTeller.cashLimit > 0.5 ? 'bg-yellow-500' : 'bg-green-500')"
+                    [style.width.%]="(selectedTeller.currentCash / selectedTeller.cashLimit) * 100"
+                  ></div>
+                </div>
+                <div class="text-xs text-gray-500 mt-1 text-right">
+                  {{Math.round((selectedTeller.currentCash / selectedTeller.cashLimit) * 100)}}% of limit
+                </div>
+              </div>
+              
+              <button 
+                (click)="openCashAdjustment(selectedTeller)"
+                class="w-full mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium"
+              >
+                <i class="fas fa-money-bill-wave mr-2"></i>
+                Adjust Cash Balance
+              </button>
+            </div>
+          </div>
+
+          <!-- Quick Actions -->
+          <div>
+            <h4 class="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h4>
+            <div class="space-y-3">
+              <button 
+                (click)="changeTellerStatus(selectedTeller, 'active')"
+                class="w-full px-4 py-3 bg-green-50 text-green-700 rounded-lg hover:bg-green-100 flex items-center justify-between"
+              >
+                <div class="flex items-center">
+                  <i class="fas fa-check-circle mr-3"></i>
+                  <span>Set as Active</span>
+                </div>
+                <i class="fas fa-chevron-right"></i>
+              </button>
+              
+              <button 
+                (click)="changeTellerStatus(selectedTeller, 'on_break')"
+                class="w-full px-4 py-3 bg-yellow-50 text-yellow-700 rounded-lg hover:bg-yellow-100 flex items-center justify-between"
+              >
+                <div class="flex items-center">
+                  <i class="fas fa-coffee mr-3"></i>
+                  <span>Set as On Break</span>
+                </div>
+                <i class="fas fa-chevron-right"></i>
+              </button>
+              
+              <button 
+                (click)="changeTellerStatus(selectedTeller, 'training')"
+                class="w-full px-4 py-3 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 flex items-center justify-between"
+              >
+                <div class="flex items-center">
+                  <i class="fas fa-graduation-cap mr-3"></i>
+                  <span>Set as Training</span>
+                </div>
+                <i class="fas fa-chevron-right"></i>
+              </button>
+              
+              <button 
+                (click)="changeTellerStatus(selectedTeller, 'inactive')"
+                class="w-full px-4 py-3 bg-red-50 text-red-700 rounded-lg hover:bg-red-100 flex items-center justify-between"
+              >
+                <div class="flex items-center">
+                  <i class="fas fa-user-slash mr-3"></i>
+                  <span>Set as Inactive</span>
+                </div>
+                <i class="fas fa-chevron-right"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Transactions -->
+        <div class="mt-8 pt-6 border-t">
+          <h4 class="text-lg font-semibold text-gray-900 mb-4">Recent Transactions</h4>
+          <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th class="px-4 py-2 text-left text-xs font-medium text-gray-500">Type</th>
+                  <th class="px-4 py-2 text-left text-xs font-medium text-gray-500">Customer</th>
+                  <th class="px-4 py-2 text-left text-xs font-medium text-gray-500">Amount</th>
+                  <th class="px-4 py-2 text-left text-xs font-medium text-gray-500">Status</th>
+                  <th class="px-4 py-2 text-left text-xs font-medium text-gray-500">Time</th>
+                </tr>
+              </thead>
+              <tbody class="bg-white divide-y divide-gray-200">
+                <tr *ngFor="let transaction of tellerTransactions" class="hover:bg-gray-50">
+                  <td class="px-4 py-3 text-sm">{{transaction.transactionType.replace('_', ' ') | titlecase}}</td>
+                  <td class="px-4 py-3 text-sm">{{transaction.customerName}}</td>
+                  <td class="px-4 py-3 text-sm font-medium">{{formatCurrency(transaction.amount)}}</td>
+                  <td class="px-4 py-3 text-sm">
+                    <span [class]="'px-2 py-1 rounded-full text-xs ' + getTransactionStatusColor(transaction.status)">
+                      {{transaction.status | titlecase}}
+                    </span>
+                  </td>
+                  <td class="px-4 py-3 text-sm text-gray-500">{{formatTimeAgo(transaction.timestamp)}}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          
+          <div *ngIf="tellerTransactions.length === 0" class="text-center py-8">
+            <i class="fas fa-exchange-alt text-gray-300 text-3xl mb-3"></i>
+            <p class="text-gray-500">No transactions found for this teller</p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="bg-gray-50 px-6 py-4 border-t">
+        <div class="flex justify-end">
+          <button 
+            (click)="closeTellerDetails()"
+            class="px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 mr-3"
+          >
+            Close
+          </button>
+          <button 
+            (click)="openCashAdjustment(selectedTeller)"
+            class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium"
+          >
+            <i class="fas fa-money-bill-wave mr-2"></i>
+            Adjust Cash
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cash Adjustment Modal -->
+  <div *ngIf="showCashAdjustment && selectedTeller" class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center p-4 z-50">
+    <div class="bg-white rounded-xl shadow-xl max-w-md w-full">
+      <div class="p-6">
+        <div class="flex justify-between items-center mb-6">
+          <h3 class="text-xl font-bold text-gray-900">Cash Adjustment</h3>
+          <button (click)="showCashAdjustment = false" class="text-gray-400 hover:text-gray-600">
+            <i class="fas fa-times text-2xl"></i>
+          </button>
+        </div>
+        
+        <div class="space-y-6">
+          <!-- Teller Info -->
+          <div class="bg-blue-50 p-4 rounded-lg">
+            <div class="flex items-center">
+              <div class="flex-shrink-0 h-12 w-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                <i class="fas fa-user text-blue-600 text-xl"></i>
+              </div>
+              <div class="ml-4">
+                <div class="font-medium text-gray-900">{{selectedTeller.name}}</div>
+                <div class="text-sm text-gray-600">{{selectedTeller.tellerId}} • {{selectedTeller.branch}}</div>
+              </div>
+            </div>
+            <div class="mt-4 grid grid-cols-2 gap-3">
+              <div>
+                <label class="text-sm text-gray-500">Current Cash</label>
+                <div class="text-lg font-bold text-green-600">{{formatCurrency(selectedTeller.currentCash)}}</div>
+              </div>
+              <div>
+                <label class="text-sm text-gray-500">Cash Limit</label>
+                <div class="text-lg font-medium">{{formatCurrency(selectedTeller.cashLimit)}}</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Adjustment Type -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-3">Adjustment Type</label>
+            <div class="grid grid-cols-2 gap-4">
+              <label class="flex items-center p-4 border-2 rounded-lg cursor-pointer hover:bg-gray-50"
+                     [class.border-green-500]="adjustmentType === 'add'"
+                     [class.border-gray-200]="adjustmentType !== 'add'">
+                <input type="radio" [(ngModel)]="adjustmentType" value="add" class="sr-only">
+                <div class="flex items-center gap-3">
+                  <div class="w-5 h-5 rounded-full border-2 flex items-center justify-center"
+                       [class.border-green-500]="adjustmentType === 'add'">
+                    <div *ngIf="adjustmentType === 'add'" class="w-3 h-3 rounded-full bg-green-500"></div>
+                  </div>
+                  <div>
+                    <div class="font-medium text-green-700">Add Cash</div>
+                    <div class="text-sm text-gray-500">Increase drawer balance</div>
+                  </div>
+                </div>
+              </label>
+              
+              <label class="flex items-center p-4 border-2 rounded-lg cursor-pointer hover:bg-gray-50"
+                     [class.border-red-500]="adjustmentType === 'remove'"
+                     [class.border-gray-200]="adjustmentType !== 'remove'">
+                <input type="radio" [(ngModel)]="adjustmentType" value="remove" class="sr-only">
+                <div class="flex items-center gap-3">
+                  <div class="w-5 h-5 rounded-full border-2 flex items-center justify-center"
+                       [class.border-red-500]="adjustmentType === 'remove'">
+                    <div *ngIf="adjustmentType === 'remove'" class="w-3 h-3 rounded-full bg-red-500"></div>
+                  </div>
+                  <div>
+                    <div class="font-medium text-red-700">Remove Cash</div>
+                    <div class="text-sm text-gray-500">Decrease drawer balance</div>
+                  </div>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <!-- Amount -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Amount</label>
+            <div class="relative">
+              <span class="absolute left-3 top-3 text-gray-500">$</span>
+              <input
+                type="number"
+                [(ngModel)]="adjustmentAmount"
+                placeholder="0.00"
+                min="0"
+                step="0.01"
+                class="w-full pl-8 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              >
+            </div>
+          </div>
+
+          <!-- Reason -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Reason for Adjustment</label>
+            <textarea
+              [(ngModel)]="adjustmentReason"
+              rows="3"
+              placeholder="Explain why this adjustment is needed..."
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            ></textarea>
+          </div>
+
+          <!-- New Balance Preview -->
+          <div *ngIf="adjustmentAmount > 0" class="bg-gray-50 p-4 rounded-lg">
+            <div class="text-sm text-gray-700 mb-2">New balance will be:</div>
+            <div class="text-2xl font-bold" 
+                 [class]="adjustmentType === 'add' ? 'text-green-600' : 'text-red-600'">
+              {{formatCurrency(
+                adjustmentType === 'add' ? 
+                selectedTeller.currentCash + adjustmentAmount : 
+                selectedTeller.currentCash - adjustmentAmount
+              )}}
+            </div>
+            <div class="text-sm text-gray-500 mt-2">
+              {{adjustmentType === 'add' ? '+' : '-'}}{{formatCurrency(adjustmentAmount)}} from current balance
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="bg-gray-50 px-6 py-4 border-t">
+        <div class="flex justify-end gap-3">
+          <button 
+            (click)="showCashAdjustment = false"
+            class="px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+          >
+            Cancel
+          </button>
+          <button 
+            (click)="adjustCash()"
+            [disabled]="adjustmentAmount <= 0 || !adjustmentReason"
+            [class]="'px-4 py-2 rounded-lg font-medium ' + 
+              (adjustmentAmount <= 0 || !adjustmentReason ? 
+               'bg-gray-300 text-gray-500 cursor-not-allowed' :
+               adjustmentType === 'add' ? 'bg-green-600 text-white hover:bg-green-700' : 
+               'bg-red-600 text-white hover:bg-red-700')"
+          >
+            {{adjustmentType === 'add' ? 'Add Cash' : 'Remove Cash'}}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

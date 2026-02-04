@@ -1,60 +1,50 @@
+// app/app.routes.ts
 import { Routes } from '@angular/router';
-import { authGuard } from './core/guards/auth.guard';
-import { roleGuard } from './core/guards/role.guard';
-import { nonAuthGuard } from './core/guards/non-auth.guard';
+import { AuthGuard } from './core/guards/auth.guard';
+import { RoleGuard } from './core/guards/role.guard';
 
 export const routes: Routes = [
-  // Public routes
+  // Auth routes (no guard)
   {
-    path: 'login',
-    loadComponent: () => import('./features/auth/login/login.component')
-      .then(m => m.LoginComponent),
-    canActivate: [nonAuthGuard]
-  },
-  {
-    path: 'register',
-    loadComponent: () => import('./features/auth/register/register.component')
-      .then(m => m.RegisterComponent),
-    canActivate: [nonAuthGuard]
-  },
-  {
-    path: 'forgot-password',
-    loadComponent: () => import('./features/auth/forgot-password/forgot-password.component')
-      .then(m => m.ForgotPasswordComponent),
-    canActivate: [nonAuthGuard]
-  },
-  {
-    path: 'reset-password',
-    loadComponent: () => import('./features/auth/reset-password/reset-password.component')
-      .then(m => m.ResetPasswordComponent),
-    canActivate: [nonAuthGuard]
+    path: 'auth',
+    loadChildren: () => import('./features/auth/auth.routes').then(m => m.AUTH_ROUTES)
   },
   
-  // Role-based routes
-  /*
+  // Admin routes
+  {
+    path: 'admin',
+    loadChildren: () => import('./features/admin/admin.routes').then(m => m.ADMIN_ROUTES),
+    canActivate: [AuthGuard, RoleGuard],
+    data: { roles: ['Admin'] }
+  },
+  
+  // Manager routes
   {
     path: 'manager',
-    loadChildren: () => import('./features/manager/manager.routes')
-      .then(m => m.MANAGER_ROUTES),
-    canActivate: [authGuard, roleGuard],
-    data: { roles: ['Manager', 'Admin'] }
+    loadChildren: () => import('./features/manager/manager.routes').then(m => m.MANAGER_ROUTES),
+    canActivate: [AuthGuard, RoleGuard],
+    data: { roles: ['Manager'] }
   },
+  
+  // Teller routes
   {
     path: 'teller',
-    loadChildren: () => import('./features/teller/teller.routes')
-      .then(m => m.TELLER_ROUTES),
-    canActivate: [authGuard, roleGuard],
+    loadChildren: () => import('./features/teller/teller.routes').then(m => m.TELLER_ROUTES),
+    canActivate: [AuthGuard, RoleGuard],
     data: { roles: ['Teller'] }
-  }, */
+  },
+  
+  // Customer routes
   {
     path: 'customer',
-    loadChildren: () => import('./features/customer/customer.routes')
-      .then(m => m.CUSTOMER_ROUTES),
-    canActivate: [authGuard, roleGuard],
+    loadChildren: () => import('./features/customer/customer.routes').then(m => m.CUSTOMER_ROUTES),
+    canActivate: [AuthGuard, RoleGuard],
     data: { roles: ['Customer'] }
-  }, 
+  },
   
-  // Default redirect
-  { path: '', redirectTo: '/login', pathMatch: 'full' },
-  { path: '**', redirectTo: '/login' }
+  // Default route
+  { path: '', redirectTo: '/auth/login', pathMatch: 'full' },
+  
+  // Fallback route
+  { path: '**', redirectTo: '/auth/login' }
 ];

@@ -2,7 +2,7 @@ import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { MockAuthService } from '../../../core/services/implementations/mock-auth.service';
+import { AuthService } from '../../../core/services/implementations/auth.service';
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
 
 
@@ -14,7 +14,7 @@ import { LoadingSpinnerComponent } from '../../../shared/components/loading-spin
   templateUrl: './change-password.component.html',
 })
 export class ChangePasswordComponent {
-  private authService = inject(MockAuthService);
+  private authService = inject(AuthService);
   private router = inject(Router);
   
   // Form data

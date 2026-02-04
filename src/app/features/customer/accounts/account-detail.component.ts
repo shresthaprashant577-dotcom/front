@@ -4,7 +4,10 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { DashboardLayoutComponent } from '../../../shared/layouts/dashboard-layout/dashboard-layout.component';
 import { DashboardCardComponent } from '../../../shared/components/dashboard-card/dashboard-card.component';
 import { DataTableComponent, TableColumn } from '../../../shared/components/data-table/data-table.component';
-import { MockDataGenerator } from '../../../core/services/mock-data/mock-data-generator.service';
+
+import { AccountService } from '../../../core/services/implementations/account.service';
+import { TransactionService } from '../../../core/services/implementations/transaction.service';
+
 import { Account } from '../../../core/models/account.model';
 import { Transaction } from '../../../core/models/transaction.model';
 
@@ -22,13 +25,13 @@ import { Transaction } from '../../../core/models/transaction.model';
 })
 export class AccountDetailComponent implements OnInit {
   private route = inject(ActivatedRoute);
-  private mockData = inject(MockDataGenerator);
-  
+  private accountService = inject(AccountService);
+  private transactionService = inject(TransactionService);
+
   account = signal<Account | null>(null);
   transactions = signal<Transaction[]>([]);
   isLoading = signal(true);
-  
-  // Transaction table columns
+
   transactionColumns: TableColumn[] = [
     { key: 'date', label: 'Date', sortable: true, format: 'date' },
     { key: 'transactionId', label: 'Transaction ID', sortable: true },
@@ -37,43 +40,46 @@ export class AccountDetailComponent implements OnInit {
     { key: 'amount', label: 'Amount', sortable: true, format: 'currency' },
     { key: 'balanceAfter', label: 'Balance After', sortable: true, format: 'currency' }
   ];
-  
+
   ngOnInit() {
     this.route.params.subscribe(params => {
       const accountId = params['id'];
-      this.loadAccount(accountId);
+      if (accountId) {
+        this.loadAccount(accountId);
+      }
     });
   }
-  
-  loadAccount(accountId: string) {
+
+  private loadAccount(accountId: string): void {
     this.isLoading.set(true);
-    
-    // Simulate API delay
-    setTimeout(() => {
-      const account = this.mockData.getAccounts().find(a => a.id === accountId);
-      
-      if (account) {
+
+    // Load account details
+    this.accountService.getAccountById(accountId).subscribe({
+      next: (account: Account) => {
         this.account.set(account);
-        
-        // Load transactions for this account
-        const accountTransactions = this.mockData.getTransactionsByAccountId(accountId)
-          .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-        
-        this.transactions.set(accountTransactions);
-        
-        // Update breadcrumb
-        this.updateBreadcrumb(account);
+
+        // ✅ Load transactions using getAccountTransactions
+        this.transactionService.getAccountTransactions(accountId).subscribe({
+          next: (res: { data: Transaction[]; total: number }) => {
+            const sorted = res.data.sort(
+              (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+            );
+            this.transactions.set(sorted);
+            this.isLoading.set(false);
+          },
+          error: (err: unknown) => {
+            console.error('Failed to load transactions', err);
+            this.isLoading.set(false);
+          }
+        });
+      },
+      error: (err: unknown) => {
+        console.error('Failed to load account', err);
+        this.isLoading.set(false);
       }
-      
-      this.isLoading.set(false);
-    }, 500);
+    });
   }
-  
-  updateBreadcrumb(account: Account) {
-    // This would be dynamic based on the account
-    // For now, we'll use a static approach
-  }
-  
+
   getAccountTypeColor(type: string): string {
     const colors: Record<string, string> = {
       'Checking': 'bg-blue-100 text-blue-800',
@@ -85,7 +91,7 @@ export class AccountDetailComponent implements OnInit {
     };
     return colors[type] || 'bg-gray-100 text-gray-800';
   }
-  
+
   getStatusColor(status: string): string {
     const colors: Record<string, string> = {
       'Active': 'bg-green-100 text-green-800',
@@ -96,14 +102,21 @@ export class AccountDetailComponent implements OnInit {
     };
     return colors[status] || 'bg-gray-100 text-gray-800';
   }
-  
+
   formatCurrency(amount: number): string {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD'
-    }).format(amount);
+    const x = amount.toFixed(2);
+    const parts = x.split('.');
+    let integerPart = parts[0];
+    const decimalPart = parts[1];
+
+    const lastThree = integerPart.slice(-3);
+    const otherNumbers = integerPart.slice(0, -3);
+    const formattedOther = otherNumbers.replace(/\B(?=(\d{2})+(?!\d))/g, ',');
+    const formattedInteger = formattedOther ? formattedOther + ',' + lastThree : lastThree;
+
+    return `NPR ${formattedInteger}.${decimalPart}`;
   }
-  
+
   formatDate(date: Date): string {
     return new Date(date).toLocaleDateString('en-US', {
       year: 'numeric',
@@ -111,11 +124,11 @@ export class AccountDetailComponent implements OnInit {
       day: 'numeric'
     });
   }
-  
+
   calculateDaysSinceActivity(): number {
     const account = this.account();
     if (!account || !account.lastActivityDate) return 0;
-    
+
     const lastActivity = new Date(account.lastActivityDate);
     const now = new Date();
     const diffTime = Math.abs(now.getTime() - lastActivity.getTime());

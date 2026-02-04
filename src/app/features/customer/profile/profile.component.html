@@ -44,18 +44,7 @@
                   <label class="block text-sm font-medium text-gray-700 mb-1">Address *</label>
                   <input type="text" class="input-field" [(ngModel)]="profileData().address" name="address" required>
                 </div>
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">City *</label>
-                  <input type="text" class="input-field" [(ngModel)]="profileData().city" name="city" required>
-                </div>
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">State *</label>
-                  <input type="text" class="input-field" [(ngModel)]="profileData().state" name="state" required>
-                </div>
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">ZIP Code *</label>
-                  <input type="text" class="input-field" [(ngModel)]="profileData().zipCode" name="zipCode" required>
-                </div>
+          
                 <div>
                   <label class="block text-sm font-medium text-gray-700 mb-1">Date of Birth</label>
                   <input type="date" class="input-field" [(ngModel)]="profileData().dateOfBirth" name="dateOfBirth">
@@ -104,18 +93,7 @@
                   <p class="text-sm font-medium text-gray-500">Address</p>
                   <p class="text-gray-900">{{ currentUser()?.address }}</p>
                 </div>
-                <div>
-                  <p class="text-sm font-medium text-gray-500">City</p>
-                  <p class="text-gray-900">{{ currentUser()?.city }}</p>
-                </div>
-                <div>
-                  <p class="text-sm font-medium text-gray-500">State</p>
-                  <p class="text-gray-900">{{ currentUser()?.state }}</p>
-                </div>
-                <div>
-                  <p class="text-sm font-medium text-gray-500">ZIP Code</p>
-                  <p class="text-gray-900">{{ currentUser()?.zipCode }}</p>
-                </div>
+             
               </div>
             </div>
           }

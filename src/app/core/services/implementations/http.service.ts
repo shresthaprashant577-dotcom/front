@@ -182,10 +182,7 @@ export class HttpService {
     let headers = options.headers || new HttpHeaders();
     
     // Add mock header for interceptors
-    if (environment.mock.enabled && !headers.has('X-Mock-API')) {
-      headers = headers.set('X-Mock-API', 'true');
-    }
-    
+  
     // Add skip loading header if needed
     if (options.skipLoading) {
       headers = headers.set('X-Skip-Loading', 'true');

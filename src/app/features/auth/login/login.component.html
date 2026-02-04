@@ -13,52 +13,23 @@
       </p>
     </div>
     
-    <!-- Demo Credentials -->
-    <div class="bg-white rounded-lg shadow-sm p-4 border border-gray-200">
-      <p class="text-sm font-medium text-gray-700 mb-2">Demo Credentials:</p>
-      <div class="grid grid-cols-2 gap-2">
-        <button 
-          (click)="fillDemoCredentials('admin')"
-          class="text-xs px-3 py-2 bg-primary-50 text-primary-700 rounded hover:bg-primary-100 transition-colors"
-        >
-          Admin
-        </button>
-        <button 
-          (click)="fillDemoCredentials('manager')"
-          class="text-xs px-3 py-2 bg-blue-50 text-blue-700 rounded hover:bg-blue-100 transition-colors"
-        >
-          Manager
-        </button>
-        <button 
-          (click)="fillDemoCredentials('teller')"
-          class="text-xs px-3 py-2 bg-green-50 text-green-700 rounded hover:bg-green-100 transition-colors"
-        >
-          Teller
-        </button>
-        <button 
-          (click)="fillDemoCredentials('customer')"
-          class="text-xs px-3 py-2 bg-purple-50 text-purple-700 rounded hover:bg-purple-100 transition-colors"
-        >
-          Customer
-        </button>
-      </div>
-    </div>
+
     
     <!-- Login Form -->
     <div class="card">
       <form class="space-y-6" (ngSubmit)="onSubmit()" #loginForm="ngForm">
         <div>
           <label for="username" class="block text-sm font-medium text-gray-700 mb-1">
-            Username
+            Email
           </label>
           <input
-            id="username"
-            name="username"
+            id="email"
+            name="email"
             type="text"
             required
-            [(ngModel)]="credentials().username"
+            [(ngModel)]="credentials().email"
             class="input-field"
-            placeholder="Enter your username"
+            placeholder="Enter your email"
             [disabled]="isLoading()"
           />
         </div>
@@ -110,7 +81,7 @@
         <div class="flex items-center justify-between">
           <div class="text-sm">
             <a 
-              routerLink="/forgot-password" 
+              routerLink="/auth/forgot-password" 
               class="font-medium text-primary-600 hover:text-primary-500"
             >
               Forgot your password?
@@ -149,7 +120,7 @@
         
         <div class="mt-6">
           <a 
-            routerLink="/register"
+            routerLink="/auth/register"
             class="w-full flex justify-center py-3 px-4 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors duration-200"
           >
             Create a new account

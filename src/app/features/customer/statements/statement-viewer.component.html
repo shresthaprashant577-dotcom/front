@@ -1,101 +1,213 @@
-<app-dashboard-layout title="Account Statements" subtitle="View and download your account statements" [breadcrumbItems]="[
-    { label: 'Dashboard', link: '/customer/dashboard' },
-    { label: 'Statements' }
-  ]">
+<!-- features/customer/statements/statement-viewer.component.html -->
+<app-dashboard-layout>
+  <div class="p-6">
+
+    <!-- Header -->
+    <div class="mb-8">
+      <h1 class="text-2xl font-bold text-gray-900">Account Statements</h1>
+      <p class="text-gray-600">View and download your account statements</p>
+    </div>
+
+    <!-- Loading -->
     @if (isLoading()) {
-    <div class="text-center py-12">
-        <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-        <p class="mt-4 text-gray-600">Loading statements...</p>
-    </div>
+      <app-loading-spinner message="Loading statements..."></app-loading-spinner>
     } @else {
-    <!-- Filters -->
-    <div class="card mb-6">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Account</label>
-                <select [ngModel]="selectedAccount()" (ngModelChange)="selectedAccount.set($event); onAccountChange()"
-                    class="select-field">
-                    @for (account of userAccounts(); track account.id) {
-                    <option [value]="account.id">
-                        {{ account.type }} - {{ account.accountNumber }}
-                    </option>
-                    }
-                </select>
-            </div>
 
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Month</label>
-                <select [ngModel]="selectedMonth()" (ngModelChange)="selectedMonth.set($event)" class="select-field">
-                    <option value="">All Months</option>
-                    @for (month of months; track month.value) {
-                    <option [value]="month.value">{{ month.label }}</option>
-                    }
-                </select>
-            </div>
+      <!-- Filters -->
+      <div class="bg-white rounded-lg shadow p-6 mb-6">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
 
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Year</label>
-                <select [ngModel]="selectedYear()" (ngModelChange)="selectedYear.set($event)" class="select-field">
-                    @for (year of years; track year) {
-                    <option [value]="year">{{ year }}</option>
-                    }
-                </select>
+          <!-- Account Selector -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Select Account</label>
+            <select
+              [ngModel]="selectedAccountId()"
+              (ngModelChange)="selectedAccountId.set($event); onAccountChange()"
+              class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option [value]="null">Select an account</option>
+              @for (acc of accounts(); track acc.id) {
+                <option [value]="acc.id">
+                  {{ acc.accountNumber }} ({{ acc.type }})
+                </option>
+              }
+            </select>
+          </div>
+
+          <!-- Period Selector -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Period</label>
+            <select
+              [ngModel]="selectedPeriod()"
+              (ngModelChange)="selectedPeriod.set($event); onPeriodChange()"
+              class="w-full border border-gray-700 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              @for (p of periods; track p.value) {
+                <option [value]="p.value">{{ p.label }}</option>
+              }
+            </select>
+          </div>
+
+          <!-- Custom Date Range (shown only when 'custom' is selected) -->
+          @if (selectedPeriod() === 'custom') {
+            <div class="md:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">From Date</label>
+                <input
+                  type="date"
+                  [ngModel]="startDate()"
+                  (ngModelChange)="startDate.set($event)"
+                  class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">To Date</label>
+                <input
+                  type="date"
+                  [ngModel]="endDate()"
+                  (ngModelChange)="endDate.set($event)"
+                  class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
             </div>
+          }
+
         </div>
-    </div>
 
-    <!-- Statements Table -->
-    @if (statements().length > 0) {
-    <div class="card">
-        <app-data-table [columns]="statementColumns" [data]="statements()" [trackBy]="'id'" [actions]="['view']" />
-    </div>
-    } @else {
-    <div class="card text-center py-12">
-        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
-            </path>
-        </svg>
-        <h3 class="mt-2 text-sm font-medium text-gray-900">No statements available</h3>
-        <p class="mt-1 text-sm text-gray-500">Statements are typically available at the end of each month.</p>
-    </div>
+        <!-- Generate Button + Format -->
+        <div class="mt-6 pt-6 border-t border-gray-200">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Export Format</label>
+              <select
+                [ngModel]="statementFormat()"
+                (ngModelChange)="statementFormat.set($event)"
+                class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                @for (f of formats; track f.value) {
+                  <option [ngValue]="f.value">{{ f.label }}</option>
+                }
+              </select>
+            </div>
+
+            <div class="flex items-end">
+              <button
+                (click)="generateStatement()"
+                [disabled]="isGenerating() || !selectedAccountId()"
+                class="bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-2 rounded-md disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                @if (isGenerating()) {
+                  Generating...
+                } @else {
+                  Generate Statement
+                }
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Statements Table -->
+      <div class="bg-white rounded-lg shadow overflow-hidden">
+        @if (!statements().length) {
+          <div class="p-12 text-center text-gray-500">
+            No statements available for the selected account and period.
+          </div>
+        } @else {
+          <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Period</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Account</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Opening</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Closing</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Txns</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                </tr>
+              </thead>
+              <tbody class="bg-white divide-y divide-gray-200">
+                @for (s of statements(); track s.id) {
+                  <tr class="hover:bg-gray-50">
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {{ statementService.formatStatementPeriod(s) }}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {{ s.accountNumber }}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {{ s.openingBalance | currency:'NPR':'symbol-narrow':'1.2-2' }}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {{ s.closingBalance | currency:'NPR':'symbol-narrow':'1.2-2' }}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {{ s.transactions?.length ?? 0 }}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-4">
+                      <button
+                        (click)="downloadStatementById(s.id)"
+                        class="text-blue-600 hover:text-blue-800"
+                      >
+                        Download
+                      </button>
+                      <button
+                        (click)="emailStatement(s)"
+                        class="text-green-600 hover:text-green-800"
+                      >
+                        Email
+                      </button>
+                      <button
+                        (click)="viewStatementDetails(s)"
+                        class="text-purple-600 hover:text-purple-800"
+                      >
+                        View
+                      </button>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </div>
+
     }
 
-    <!-- Statement Information -->
-    <div class="card mt-8">
-        <h3 class="text-lg font-medium text-gray-900 mb-4">Statement Information</h3>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div class="space-y-4">
-                <div>
-                    <h4 class="font-medium text-gray-900 mb-2">Statement Cycle</h4>
-                    <p class="text-sm text-gray-600">
-                        Statements are generated monthly on the last day of the month.
-                        You can access up to 5 years of statements online.
-                    </p>
-                </div>
-                <div>
-                    <h4 class="font-medium text-gray-900 mb-2">Download Formats</h4>
-                    <ul class="text-sm text-gray-600 space-y-1">
-                        <li>• PDF (Recommended for viewing and printing)</li>
-                        <li>• CSV (For spreadsheet analysis)</li>
-                        <li>• OFX (For financial software)</li>
-                    </ul>
-                </div>
-            </div>
+    <!-- Statement Details Modal -->
+    @if (selectedStatement()) {
+      <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-lg shadow-xl max-w-6xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+          <div class="flex justify-between items-center p-6 border-b">
+            <h3 class="text-xl font-semibold text-gray-900">
+              Statement Details – {{ selectedStatement()!.accountNumber }}
+            </h3>
+            <button
+              (click)="closeStatementDetails()"
+              class="text-gray-500 hover:text-gray-700 text-2xl leading-none"
+            >
+              ×
+            </button>
+          </div>
 
-            <div class="space-y-4">
-                <div>
-                    <h4 class="font-medium text-gray-900 mb-2">Paperless Statements</h4>
-                    <p class="text-sm text-gray-600">
-                        Enroll in paperless statements to receive notifications when new statements are available.
-                        Help the environment and reduce clutter.
-                    </p>
-                </div>
-                <button class="w-full btn-secondary mt-4">
-                    Enroll in Paperless Statements
-                </button>
-            </div>
+          <div class="p-6 overflow-auto flex-1">
+            <app-data-table
+              [columns]="transactionColumns"
+              [data]="selectedStatement()!.transactions ?? []"
+            ></app-data-table>
+          </div>
+
+          <div class="p-6 border-t bg-gray-50 flex justify-end">
+            <button
+              (click)="closeStatementDetails()"
+              class="px-5 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700"
+            >
+              Close
+            </button>
+          </div>
         </div>
-    </div>
+      </div>
     }
+
+  </div>
 </app-dashboard-layout>

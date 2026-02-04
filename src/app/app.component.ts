@@ -19,5 +19,5 @@ import { GlobalLoadingComponent } from './shared/components/global-loading/globa
   `,
 })
 export class AppComponent {
-  title = 'SecureBank - Banking Management System';
+  title = 'Banking Management System';
 }

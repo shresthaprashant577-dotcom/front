@@ -10,14 +10,12 @@ import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DashboardLayoutComponent } from '../../../shared/layouts/dashboard-layout/dashboard-layout.component';
 import { DataTableComponent, TableColumn } from '../../../shared/components/data-table/data-table.component';
-import { MockAuthService } from '../../../core/services/implementations/mock-auth.service';
-import { MockDataGenerator } from '../../../core/services/mock-data/mock-data-generator.service';
-import {
-  Transaction,
-  TransactionType,
-  TransactionStatus
-} from '../../../core/models/transaction.model';
+import { AuthService } from '../../../core/services/implementations/auth.service';
+import { Transaction, TransactionType, TransactionStatus } from '../../../core/models/transaction.model';
 import { Account } from '../../../core/models/account.model';
+import { AccountService } from '../../../core/services/implementations/account.service';
+import { TransactionService } from '../../../core/services/implementations/transaction.service';
+import { forkJoin } from 'rxjs';
 
 @Component({
   selector: 'app-transaction-history',
@@ -31,8 +29,9 @@ import { Account } from '../../../core/models/account.model';
   templateUrl: './transaction-history.component.html',
 })
 export class TransactionHistoryComponent implements OnInit {
-  private authService = inject(MockAuthService);
-  private mockData = inject(MockDataGenerator);
+  private authService = inject(AuthService);
+  private accountService = inject(AccountService);
+  private transactionService = inject(TransactionService);
   private platformId = inject(PLATFORM_ID);
   private isBrowser = isPlatformBrowser(this.platformId);
 
@@ -53,6 +52,27 @@ export class TransactionHistoryComponent implements OnInit {
   endDate = signal<string>('');
   searchTerm = signal<string>('');
 
+  transactionTypes = [
+  { label: 'All', value: 'all' },
+  { label: 'Deposit', value: 'Deposit' },
+  { label: 'Withdrawal', value: 'Withdrawal' },
+  { label: 'Transfer', value: 'Transfer' },
+  { label: 'Payment', value: 'Payment' },
+  { label: 'Fee', value: 'Fee' },
+  { label: 'Interest', value: 'Interest' },
+  { label: 'Reversal', value: 'Reversal' }
+];
+
+statusTypes = [
+  { label: 'All', value: 'all' },
+  { label: 'Completed', value: 'Completed' },
+  { label: 'Pending', value: 'Pending' },
+  { label: 'Failed', value: 'Failed' },
+  { label: 'Cancelled', value: 'Cancelled' },
+  { label: 'Reversed', value: 'Reversed' }
+];
+
+
   // =======================
   // PAGINATION
   // =======================
@@ -70,26 +90,6 @@ export class TransactionHistoryComponent implements OnInit {
     { key: 'category', label: 'Category', sortable: true },
     { key: 'amount', label: 'Amount', sortable: true, format: 'currency' },
     { key: 'status', label: 'Status', sortable: true, format: 'badge' }
-  ];
-
-  transactionTypes = [
-    { value: 'all', label: 'All Types' },
-    { value: 'Deposit', label: 'Deposit' },
-    { value: 'Withdrawal', label: 'Withdrawal' },
-    { value: 'Transfer', label: 'Transfer' },
-    { value: 'Payment', label: 'Payment' },
-    { value: 'Fee', label: 'Fee' },
-    { value: 'Interest', label: 'Interest' },
-    { value: 'Reversal', label: 'Reversal' }
-  ];
-
-  statusTypes = [
-    { value: 'all', label: 'All Status' },
-    { value: 'Completed', label: 'Completed' },
-    { value: 'Pending', label: 'Pending' },
-    { value: 'Failed', label: 'Failed' },
-    { value: 'Cancelled', label: 'Cancelled' },
-    { value: 'Reversed', label: 'Reversed' }
   ];
 
   // =======================
@@ -133,9 +133,6 @@ export class TransactionHistoryComponent implements OnInit {
     return filtered;
   });
 
-  // =======================
-  // COMPUTED: PAGED
-  // =======================
   filteredTransactions = computed(() => {
     const startIndex = (this.currentPage() - 1) * this.pageSize();
     const endIndex = startIndex + this.pageSize();
@@ -144,9 +141,6 @@ export class TransactionHistoryComponent implements OnInit {
 
   totalItems = computed(() => this.filteredAll().length);
 
-  // =======================
-  // COMPUTED: TOTALS
-  // =======================
   creditsTotal = computed(() =>
     this.filteredAll()
       .filter(t => t.type === 'Deposit' || t.type === 'Interest')
@@ -155,11 +149,7 @@ export class TransactionHistoryComponent implements OnInit {
 
   debitsTotal = computed(() =>
     this.filteredAll()
-      .filter(t =>
-        t.type === 'Withdrawal' ||
-        t.type === 'Payment' ||
-        t.type === 'Fee'
-      )
+      .filter(t => t.type === 'Withdrawal' || t.type === 'Payment' || t.type === 'Fee')
       .reduce((sum, t) => sum + t.amount, 0)
   );
 
@@ -188,25 +178,49 @@ export class TransactionHistoryComponent implements OnInit {
   loadTransactions() {
     this.isLoading.set(true);
 
-    this.authService.getCurrentUser().subscribe(user => {
-      if (!user) {
-        this.isLoading.set(false);
-        return;
-      }
-
-      const accounts = this.mockData.getAccountsByUserId(user.id);
-      this.userAccounts.set(accounts);
-
-      let all: Transaction[] = [];
-      accounts.forEach(account => {
-        const txns = this.mockData.getTransactionsByAccountId(account.id);
-        all = [...all, ...txns];
-      });
-
-      all.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-      this.allTransactions.set(all);
-
+    const user = this.authService.getCurrentUser();
+    if (!user?.customerId) {
       this.isLoading.set(false);
+      return;
+    }
+
+    // Load user accounts
+    this.accountService.getCustomerAccounts(user.customerId).subscribe({
+      next: (accounts: Account[]) => {
+        this.userAccounts.set(accounts);
+
+        if (accounts.length === 0) {
+          this.isLoading.set(false);
+          return;
+        }
+
+        // Load transactions for all accounts using forkJoin
+        const txnsObservables = accounts.map(acc =>
+          this.transactionService.getAccountTransactions(acc.id).pipe()
+        );
+
+        forkJoin(txnsObservables).subscribe({
+          next: (results) => {
+            let allTxns: Transaction[] = [];
+            results.forEach(r => {
+              allTxns = [...allTxns, ...r.data];
+            });
+
+            allTxns.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+            this.allTransactions.set(allTxns);
+
+            this.isLoading.set(false);
+          },
+          error: (err) => {
+            console.error('Failed to load transactions', err);
+            this.isLoading.set(false);
+          }
+        });
+      },
+      error: (err) => {
+        console.error('Failed to load accounts', err);
+        this.isLoading.set(false);
+      }
     });
   }
 

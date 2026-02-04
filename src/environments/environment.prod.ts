@@ -1,10 +1,9 @@
+// environments/environment.prod.ts
 export const environment = {
   production: true,
-  apiUrl: 'https://api.securebank.com/v1',
-  mock: {
-    enabled: false,
-    delay: 0,
-    simulateErrors: false,
-    errorRate: 0
-  }
+  apiUrl: 'https://your-domain.com/api',
+  tokenKey: 'banking_auth_token',
+  refreshTokenKey: 'banking_refresh_token',
+  userKey: 'banking_user_data',
+  timeout: 30000
 };

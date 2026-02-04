@@ -2,7 +2,7 @@ import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { MockAuthService } from '../../../core/services/implementations/mock-auth.service';
+import { AuthService } from '../../../core/services/implementations/auth.service';
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
 
 @Component({
@@ -12,7 +12,7 @@ import { LoadingSpinnerComponent } from '../../../shared/components/loading-spin
   templateUrl: './register.component.html'
 })
 export class RegisterComponent {
-  private authService = inject(MockAuthService);
+  private authService = inject(AuthService);
   private router = inject(Router);
   
   // Form data
@@ -25,11 +25,7 @@ export class RegisterComponent {
     lastName: '',
     phoneNumber: '',
     dateOfBirth: '',
-    ssn: '',
-    address: '',
-    city: '',
-    state: '',
-    zipCode: ''
+    address: ''
   });
   
   // UI State
@@ -48,14 +44,7 @@ export class RegisterComponent {
     special: false
   });
   
-  // State options for dropdown
-  states = [
-    'AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA',
-    'HI', 'ID', 'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD',
-    'MA', 'MI', 'MN', 'MS', 'MO', 'MT', 'NE', 'NV', 'NH', 'NJ',
-    'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC',
-    'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY'
-  ];
+
   
   onSubmit() {
     // Validate form
@@ -70,36 +59,23 @@ export class RegisterComponent {
       username: this.userData().username,
       email: this.userData().email,
       password: this.userData().password,
+      confirmPassword: this.userData().confirmPassword,
       firstName: this.userData().firstName,
       lastName: this.userData().lastName,
       phoneNumber: this.userData().phoneNumber,
-      dateOfBirth: new Date(this.userData().dateOfBirth),
-      ssn: this.userData().ssn.replace(/-/g, ''),
-      address: this.userData().address,
-      city: this.userData().city,
-      state: this.userData().state,
-      zipCode: this.userData().zipCode
+      dateOfBirth: this.userData().dateOfBirth,
+      address: this.userData().address
     };
     
     this.authService.register(registerData).subscribe({
-      next: (user) => {
+      next: (response) => {
         this.isLoading.set(false);
-        // Auto login after successful registration
-        this.authService.login({
-          username: registerData.username,
-          password: registerData.password
-        }).subscribe({
-          next: () => {
-            this.router.navigate(['/customer/dashboard']);
-          },
-          error: (error) => {
-            this.errorMessage.set('Registration successful! Please login.');
-          }
-        });
+        // Registration successful, redirect to customer dashboard
+        this.router.navigate(['/customer/dashboard']);
       },
       error: (error) => {
         this.isLoading.set(false);
-        this.errorMessage.set(error.message || 'Registration failed. Please try again.');
+        this.errorMessage.set(error.error?.message || 'Registration failed. Please try again.');
       }
     });
   }
@@ -109,8 +85,7 @@ export class RegisterComponent {
     
     // Check required fields
     if (!data.username || !data.email || !data.password || !data.confirmPassword || 
-        !data.firstName || !data.lastName || !data.phoneNumber || !data.dateOfBirth ||
-        !data.ssn || !data.address || !data.city || !data.state || !data.zipCode) {
+        !data.firstName || !data.lastName || !data.dateOfBirth || !data.address) {
       this.errorMessage.set('Please fill in all required fields.');
       return false;
     }
@@ -134,19 +109,14 @@ export class RegisterComponent {
       return false;
     }
     
-    // Check SSN format (simple validation)
-    const ssnRegex = /^\d{3}-?\d{2}-?\d{4}$/;
-    if (!ssnRegex.test(data.ssn)) {
-      this.errorMessage.set('Please enter a valid SSN (format: XXX-XX-XXXX).');
-      return false;
-    }
-    
-    // Check phone number format
-    const phoneRegex = /^\d{10}$|^\d{3}-\d{3}-\d{4}$/;
-    const cleanPhone = data.phoneNumber.replace(/\D/g, '');
-    if (cleanPhone.length !== 10) {
-      this.errorMessage.set('Please enter a valid 10-digit phone number.');
-      return false;
+    // Check phone number format (optional field)
+    if (data.phoneNumber) {
+      const phoneRegex = /^\d{10}$|^\d{3}-\d{3}-\d{4}$/;
+      const cleanPhone = data.phoneNumber.replace(/\D/g, '');
+      if (cleanPhone.length !== 10) {
+        this.errorMessage.set('Please enter a valid 10-digit phone number.');
+        return false;
+      }
     }
     
     // Check date of birth (must be at least 18 years old)
@@ -200,11 +170,7 @@ export class RegisterComponent {
       lastName: 'Doe',
       phoneNumber: '555-123-4567',
       dateOfBirth: '1990-01-15',
-      ssn: '123-45-6789',
-      address: '123 Main Street',
-      city: 'New York',
-      state: 'NY',
-      zipCode: '10001'
+      address: '123 Main Street, New York, NY 10001'
     });
     
     this.onPasswordChange();

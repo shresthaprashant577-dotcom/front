@@ -25,5 +25,10 @@ export const AUTH_ROUTES: Routes = [
     path: 'change-password',
     loadComponent: () => import('./change-password/change-password.component')
       .then(m => m.ChangePasswordComponent)
+  },
+  {
+    path: 'first-time-password-change',
+    loadComponent: () => import('./first-time-password-change/first-time-password-change.component')
+      .then(m => m.FirstTimePasswordChangeComponent)
   }
 ];

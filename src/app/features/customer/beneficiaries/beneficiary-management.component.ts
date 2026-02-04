@@ -1,100 +1,84 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+// features/customer/beneficiaries/beneficiary-management.component.ts
+import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { DashboardLayoutComponent } from '../../../shared/layouts/dashboard-layout/dashboard-layout.component';
-import { DataTableComponent, TableColumn } from '../../../shared/components/data-table/data-table.component';
-import { MockAuthService } from '../../../core/services/implementations/mock-auth.service';
-import { MockDataGenerator } from '../../../core/services/mock-data/mock-data-generator.service';
-import { Beneficiary } from '../../../core/models/beneficiary.model';
+import { AuthService } from '../../../core/services/implementations/auth.service';
+import { BeneficiaryService, Beneficiary } from '../../../core/services/implementations/beneficiary.service';
+import { DataTableComponent } from '../../../shared/components/data-table/data-table.component';
+import { NotificationService } from '../../../core/services/implementations/notification.service';
+import { DashboardLayoutComponent } from '../../../shared/shared.routes';
 
 @Component({
   selector: 'app-beneficiary-management',
   standalone: true,
-  imports: [
-    CommonModule,
-    FormsModule,
-    DashboardLayoutComponent,
-    DataTableComponent
-  ],
+  imports: [CommonModule, FormsModule, DashboardLayoutComponent, DataTableComponent],
   templateUrl: './beneficiary-management.component.html',
+
 })
 export class BeneficiaryManagementComponent implements OnInit {
-  private authService = inject(MockAuthService);
-  private mockData = inject(MockDataGenerator);
-  
-  beneficiaries = signal<Beneficiary[]>([]);
   isLoading = signal(true);
+  beneficiaries = signal<Beneficiary[]>([]);
+
   showAddForm = signal(false);
-  
-  // Form data
-  beneficiaryData = signal({
-    name: '',
-    accountNumber: '',
-    bankName: '',
-    bankCode: '',
-    branchName: '',
-    nickname: '',
-    type: 'Internal' as 'Internal' | 'Domestic' | 'International',
-    email: '',
-    phoneNumber: '',
-    maxTransferLimit: ''
-  });
-  
-  // Table columns
-  beneficiaryColumns: TableColumn[] = [
+  beneficiaryColumns = [
     { key: 'name', label: 'Name', sortable: true },
     { key: 'accountNumber', label: 'Account Number', sortable: true },
-    { key: 'bankName', label: 'Bank', sortable: true },
-    { key: 'type', label: 'Type', sortable: true, format: 'badge' },
-    { key: 'maxTransferLimit', label: 'Max Limit', sortable: true, format: 'currency' },
-    { key: 'isActive', label: 'Status', sortable: true, format: 'badge' }
+    { key: 'bankName', label: 'Bank Name', sortable: true },
+    { key: 'ifscCode', label: 'IFSC Code', sortable: true },
+    { key: 'nickname', label: 'Nickname', sortable: true },
+    { key: 'isActive', label: 'Status', sortable: true, format: 'badge' as const}
   ];
-  
-  ngOnInit() {
+
+  saveBeneficiary(): void {
+  console.log('Saving beneficiary...');
+  this.showAddForm.set(false);
+}
+
+  constructor(
+    private authService: AuthService,
+    private beneficiaryService: BeneficiaryService,
+    private notificationService : NotificationService,
+  ) {}
+
+  ngOnInit(): void {
     this.loadBeneficiaries();
   }
-  
-  loadBeneficiaries() {
+
+  loadBeneficiaries(): void {
     this.isLoading.set(true);
-    
-    this.authService.getCurrentUser().subscribe(user => {
-      if (user) {
-        const beneficiaries = this.mockData.getBeneficiariesByUserId(user.id);
-        this.beneficiaries.set(beneficiaries);
+    this.beneficiaryService.getMyBeneficiaries().subscribe({
+      next: (data) => {
+        this.beneficiaries.set(data);
+        this.isLoading.set(false);
+      },
+      error: (error) => {
+        this.notificationService.error('Error', 'Failed to load beneficiaries');
+        this.isLoading.set(false);
       }
-      this.isLoading.set(false);
     });
   }
-  
-  addBeneficiary() {
-    this.showAddForm.set(true);
+
+  addBeneficiary(): void {
+    // Implement add beneficiary logic
+    console.log('Add beneficiary clicked');
   }
-  
-  saveBeneficiary() {
-    // In real app, this would save to backend
-    console.log('Saving beneficiary:', this.beneficiaryData());
-    
-    // Reset form and hide
-    this.beneficiaryData.set({
-      name: '',
-      accountNumber: '',
-      bankName: '',
-      bankCode: '',
-      branchName: '',
-      nickname: '',
-      type: 'Internal',
-      email: '',
-      phoneNumber: '',
-      maxTransferLimit: ''
-    });
-    
-    this.showAddForm.set(false);
+
+  onEdit(beneficiary: Beneficiary): void {
+    // Implement edit logic
+    console.log('Edit beneficiary:', beneficiary);
   }
-  
-  formatCurrency(amount: number): string {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD'
-    }).format(amount);
+
+  onDelete(beneficiary: Beneficiary): void {
+    if (confirm(`Are you sure you want to delete ${beneficiary.name}?`)) {
+      this.beneficiaryService.deleteBeneficiary(beneficiary.id).subscribe({
+        next: () => {
+          this.notificationService.success('Success', 'Beneficiary deleted successfully');
+          this.loadBeneficiaries();
+        },
+        error: () => {
+          this.notificationService.error('Error', 'Failed to delete beneficiary');
+        }
+      });
+    }
   }
 }

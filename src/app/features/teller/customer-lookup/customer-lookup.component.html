@@ -19,7 +19,8 @@
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">Search By</label>
               <select 
-                [(ngModel)]="searchType()"
+                [ngModel]="searchType()"
+                (ngModelChange)="searchType.set($event)"
                 class="select-field"
               >
                 @for (type of searchTypes; track type.value) {
@@ -33,7 +34,8 @@
               <div class="flex">
                 <input
                   type="text"
-                  [(ngModel)]="searchQuery()"
+                  [ngModel]="searchQuery()"
+                  (ngModelChange)="searchQuery.set($event)"
                   (input)="searchCustomers()"
                   class="input-field rounded-r-none"
                   placeholder="Enter search term..."
@@ -175,7 +177,7 @@
                 <div class="flex justify-between">
                   <span class="text-sm text-gray-600">Last Login</span>
                   <span class="text-sm text-gray-900">
-                    {{ selectedCustomer()!.lastLogin ? formatDate(selectedCustomer()!.lastLogin) : 'Never' }}
+                    {{ formatDate(selectedCustomer()!.lastLogin) }}
                   </span>
                 </div>
               </div>
@@ -298,7 +300,7 @@
             <div class="flex justify-between text-sm mb-1">
               <span class="text-gray-600">Active Customers</span>
               <span class="font-medium text-gray-900">
-                {{ allCustomers().filter(c => c.isActive).length }}
+                {{ getActiveCustomersCount() }}
               </span>
             </div>
             <div class="h-2 bg-gray-200 rounded-full overflow-hidden">

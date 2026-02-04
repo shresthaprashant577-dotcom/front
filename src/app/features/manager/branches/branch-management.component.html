@@ -1,0 +1,737 @@
+<div class="branch-management">
+  <app-dashboard-layout>
+    <!-- Header Section -->
+    <div class="bg-white shadow-sm border-b border-gray-200">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div class="md:flex md:items-center md:justify-between">
+          <div class="flex-1 min-w-0">
+            <h1 class="text-2xl font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">
+              Branch Management
+            </h1>
+            <p class="mt-1 text-sm text-gray-500">
+              Manage all bank branches, view performance metrics, and handle operations
+            </p>
+          </div>
+          <div class="mt-4 md:mt-0 md:ml-4">
+            <button
+              type="button"
+              (click)="showNewBranchForm = true"
+              class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            >
+              <svg class="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M10 3a1 1 0 00-1 1v5H4a1 1 0 100 2h5v5a1 1 0 102 0v-5h5a1 1 0 100-2h-5V4a1 1 0 00-1-1z" clip-rule="evenodd" />
+              </svg>
+              Add New Branch
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        <div class="bg-white overflow-hidden shadow rounded-lg">
+          <div class="p-5">
+            <div class="flex items-center">
+              <div class="flex-shrink-0 bg-indigo-500 rounded-md p-3">
+                <svg class="h-6 w-6 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                </svg>
+              </div>
+              <div class="ml-5 w-0 flex-1">
+                <dl>
+                  <dt class="text-sm font-medium text-gray-500 truncate">Total Branches</dt>
+                  <dd class="text-lg font-medium text-gray-900">{{ totalBranches }}</dd>
+                </dl>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white overflow-hidden shadow rounded-lg">
+          <div class="p-5">
+            <div class="flex items-center">
+              <div class="flex-shrink-0 bg-green-500 rounded-md p-3">
+                <svg class="h-6 w-6 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5 0a21.667 21.667 0 00-2.937-1.137M13.5 21a21.667 21.667 0 01-2.937 1.137" />
+                </svg>
+              </div>
+              <div class="ml-5 w-0 flex-1">
+                <dl>
+                  <dt class="text-sm font-medium text-gray-500 truncate">Total Customers</dt>
+                  <dd class="text-lg font-medium text-gray-900">{{ totalCustomers | number }}</dd>
+                </dl>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white overflow-hidden shadow rounded-lg">
+          <div class="p-5">
+            <div class="flex items-center">
+              <div class="flex-shrink-0 bg-blue-500 rounded-md p-3">
+                <svg class="h-6 w-6 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+              </div>
+              <div class="ml-5 w-0 flex-1">
+                <dl>
+                  <dt class="text-sm font-medium text-gray-500 truncate">Total Employees</dt>
+                  <dd class="text-lg font-medium text-gray-900">{{ totalEmployees | number }}</dd>
+                </dl>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white overflow-hidden shadow rounded-lg">
+          <div class="p-5">
+            <div class="flex items-center">
+              <div class="flex-shrink-0 bg-purple-500 rounded-md p-3">
+                <svg class="h-6 w-6 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div class="ml-5 w-0 flex-1">
+                <dl>
+                  <dt class="text-sm font-medium text-gray-500 truncate">Monthly Revenue</dt>
+                  <dd class="text-lg font-medium text-gray-900">{{ formatCurrency(totalRevenue) }}</dd>
+                </dl>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filters and Search -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+      <div class="bg-white shadow-sm rounded-lg p-4">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <!-- Search Input -->
+          <div>
+            <label for="search" class="block text-sm font-medium text-gray-700 mb-1">Search Branches</label>
+            <div class="relative">
+              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+                </svg>
+              </div>
+              <input
+                type="text"
+                id="search"
+                [(ngModel)]="searchTerm"
+                (ngModelChange)="applyFilters()"
+                class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                placeholder="Search by name, code, city..."
+              />
+            </div>
+          </div>
+
+          <!-- Status Filter -->
+          <div>
+            <label for="status" class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+            <select
+              id="status"
+              [(ngModel)]="selectedStatus"
+              (ngModelChange)="applyFilters()"
+              class="block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
+            >
+              <option value="all">All Statuses</option>
+              <option *ngFor="let status of statuses" [value]="status.value">{{ status.label }}</option>
+            </select>
+          </div>
+
+          <!-- State Filter -->
+          <div>
+            <label for="state" class="block text-sm font-medium text-gray-700 mb-1">State</label>
+            <select
+              id="state"
+              [(ngModel)]="selectedState"
+              (ngModelChange)="applyFilters()"
+              class="block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
+            >
+              <option *ngFor="let state of states" [value]="state">{{ state }}</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Branches Table -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+      <div class="flex flex-col">
+        <div class="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+          <div class="py-2 align-middle inline-block min-w-full sm:px-6 lg:px-8">
+            <div class="shadow overflow-hidden border-b border-gray-200 sm:rounded-lg">
+              <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                  <tr>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <a href="javascript:void(0)" (click)="onSort('name')" class="group inline-flex">
+                        Branch Name
+                        <span class="ml-2 flex-none rounded text-gray-400">
+                          <svg *ngIf="sortColumn === 'name' && sortDirection === 'asc'" class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                          </svg>
+                          <svg *ngIf="sortColumn === 'name' && sortDirection === 'desc'" class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd" />
+                          </svg>
+                          <svg *ngIf="sortColumn !== 'name'" class="h-5 w-5 opacity-0 group-hover:opacity-100" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 3a1 1 0 01.707.293l3 3a1 1 0 01-1.414 1.414L10 5.414 7.707 7.707a1 1 0 01-1.414-1.414l3-3A1 1 0 0110 3zm-3.707 9.293a1 1 0 011.414 0L10 14.586l2.293-2.293a1 1 0 011.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" />
+                          </svg>
+                        </span>
+                      </a>
+                    </th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <a href="javascript:void(0)" (click)="onSort('city')" class="group inline-flex">
+                        Location
+                        <span class="ml-2 flex-none rounded text-gray-400">
+                          <svg *ngIf="sortColumn === 'city' && sortDirection === 'asc'" class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                          </svg>
+                          <svg *ngIf="sortColumn === 'city' && sortDirection === 'desc'" class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd" />
+                          </svg>
+                          <svg *ngIf="sortColumn !== 'city'" class="h-5 w-5 opacity-0 group-hover:opacity-100" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 3a1 1 0 01.707.293l3 3a1 1 0 01-1.414 1.414L10 5.414 7.707 7.707a1 1 0 01-1.414-1.414l3-3A1 1 0 0110 3zm-3.707 9.293a1 1 0 011.414 0L10 14.586l2.293-2.293a1 1 0 011.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" />
+                          </svg>
+                        </span>
+                      </a>
+                    </th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <a href="javascript:void(0)" (click)="onSort('totalCustomers')" class="group inline-flex">
+                        Customers
+                        <span class="ml-2 flex-none rounded text-gray-400">
+                          <svg *ngIf="sortColumn === 'totalCustomers' && sortDirection === 'asc'" class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                          </svg>
+                          <svg *ngIf="sortColumn === 'totalCustomers' && sortDirection === 'desc'" class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd" />
+                          </svg>
+                          <svg *ngIf="sortColumn !== 'totalCustomers'" class="h-5 w-5 opacity-0 group-hover:opacity-100" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 3a1 1 0 01.707.293l3 3a1 1 0 01-1.414 1.414L10 5.414 7.707 7.707a1 1 0 01-1.414-1.414l3-3A1 1 0 0110 3zm-3.707 9.293a1 1 0 011.414 0L10 14.586l2.293-2.293a1 1 0 011.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" />
+                          </svg>
+                        </span>
+                      </a>
+                    </th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <a href="javascript:void(0)" (click)="onSort('monthlyRevenue')" class="group inline-flex">
+                        Revenue
+                        <span class="ml-2 flex-none rounded text-gray-400">
+                          <svg *ngIf="sortColumn === 'monthlyRevenue' && sortDirection === 'asc'" class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                          </svg>
+                          <svg *ngIf="sortColumn === 'monthlyRevenue' && sortDirection === 'desc'" class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd" />
+                          </svg>
+                          <svg *ngIf="sortColumn !== 'monthlyRevenue'" class="h-5 w-5 opacity-0 group-hover:opacity-100" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 3a1 1 0 01.707.293l3 3a1 1 0 01-1.414 1.414L10 5.414 7.707 7.707a1 1 0 01-1.414-1.414l3-3A1 1 0 0110 3zm-3.707 9.293a1 1 0 011.414 0L10 14.586l2.293-2.293a1 1 0 011.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" />
+                          </svg>
+                        </span>
+                      </a>
+                    </th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <a href="javascript:void(0)" (click)="onSort('totalBalance')" class="group inline-flex">
+                        Total Balance
+                        <span class="ml-2 flex-none rounded text-gray-400">
+                          <svg *ngIf="sortColumn === 'totalBalance' && sortDirection === 'asc'" class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                          </svg>
+                          <svg *ngIf="sortColumn === 'totalBalance' && sortDirection === 'desc'" class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd" />
+                          </svg>
+                          <svg *ngIf="sortColumn !== 'totalBalance'" class="h-5 w-5 opacity-0 group-hover:opacity-100" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 3a1 1 0 01.707.293l3 3a1 1 0 01-1.414 1.414L10 5.414 7.707 7.707a1 1 0 01-1.414-1.414l3-3A1 1 0 0110 3zm-3.707 9.293a1 1 0 011.414 0L10 14.586l2.293-2.293a1 1 0 011.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" />
+                          </svg>
+                        </span>
+                      </a>
+                    </th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Security</th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                  </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                  <tr *ngFor="let branch of paginatedBranches" class="hover:bg-gray-50">
+                    <td class="px-6 py-4 whitespace-nowrap">
+                      <div class="flex items-center">
+                        <div class="flex-shrink-0 h-10 w-10 bg-indigo-100 rounded-lg flex items-center justify-center">
+                          <svg class="h-6 w-6 text-indigo-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                          </svg>
+                        </div>
+                        <div class="ml-4">
+                          <div class="text-sm font-medium text-gray-900">{{ branch.name }}</div>
+                          <div class="text-sm text-gray-500">{{ branch.branchCode }}</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                      <div class="text-sm text-gray-900">{{ branch.city }}, {{ branch.state }}</div>
+                      <div class="text-sm text-gray-500">{{ branch.address }}</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                      <div class="text-sm text-gray-900">{{ branch.totalCustomers | number }}</div>
+                      <div class="text-sm text-gray-500">{{ branch.employees }} employees</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                      <div class="text-sm font-medium text-gray-900">{{ formatCurrency(branch.monthlyRevenue) }}</div>
+                      <div class="text-sm text-gray-500" [ngClass]="branch.monthlyGrowth >= 0 ? 'text-green-600' : 'text-red-600'">
+                        {{ branch.monthlyGrowth >= 0 ? '↑' : '↓' }} {{ branch.monthlyGrowth | number:'1.1-1' }}%
+                      </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {{ formatCurrency(branch.totalBalance) }}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                      <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ getStatusColor(branch.status) }}">
+                        {{ getStatusLabel(branch.status) }}
+                      </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                      <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ getSecurityLevelColor(branch.securityLevel) }}">
+                        {{ getSecurityLevelLabel(branch.securityLevel) }}
+                      </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                      <div class="flex space-x-2">
+                        <button
+                          (click)="viewBranchDetails(branch)"
+                          class="text-indigo-600 hover:text-indigo-900"
+                          title="View Details"
+                        >
+                          <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                          </svg>
+                        </button>
+                        <button
+                          (click)="editBranch(branch)"
+                          class="text-yellow-600 hover:text-yellow-900"
+                          title="Edit"
+                        >
+                          <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                          </svg>
+                        </button>
+                        <button
+                          (click)="deleteBranch(branch)"
+                          class="text-red-600 hover:text-red-900"
+                          title="Delete"
+                        >
+                          <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pagination -->
+        <div class="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
+          <div class="flex-1 flex justify-between sm:hidden">
+            <button
+              (click)="changePage(currentPage - 1)"
+              [disabled]="currentPage === 1"
+              class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Previous
+            </button>
+            <button
+              (click)="changePage(currentPage + 1)"
+              [disabled]="currentPage === totalPages"
+              class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Next
+            </button>
+          </div>
+          <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+            <div>
+              <p class="text-sm text-gray-700">
+                Showing
+                <span class="font-medium">{{ (currentPage - 1) * itemsPerPage + 1 }}</span>
+                to
+                <span class="font-medium">{{ Math.min(currentPage * itemsPerPage, filteredBranches.length) }}</span>
+                of
+                <span class="font-medium">{{ filteredBranches.length }}</span>
+                results
+              </p>
+            </div>
+            <div>
+              <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                <button
+                  (click)="changePage(currentPage - 1)"
+                  [disabled]="currentPage === 1"
+                  class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <span class="sr-only">Previous</span>
+                  <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
+                  </svg>
+                </button>
+                <button
+                  *ngFor="let page of getPageNumbers()"
+                  (click)="changePage(page)"
+                  [class]="page === currentPage 
+                    ? 'z-10 bg-indigo-50 border-indigo-500 text-indigo-600 relative inline-flex items-center px-4 py-2 border text-sm font-medium'
+                    : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50 relative inline-flex items-center px-4 py-2 border text-sm font-medium'"
+                >
+                  {{ page }}
+                </button>
+                <button
+                  (click)="changePage(currentPage + 1)"
+                  [disabled]="currentPage === totalPages"
+                  class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <span class="sr-only">Next</span>
+                  <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                  </svg>
+                </button>
+              </nav>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </app-dashboard-layout>
+
+  <!-- Branch Details Modal -->
+  <div *ngIf="showBranchDetails && selectedBranch" class="fixed inset-0 overflow-hidden" style="z-index: 40;">
+    <div class="absolute inset-0 overflow-hidden">
+      <div class="absolute inset-0 bg-gray-500 bg-opacity-75 transition-opacity" (click)="closeBranchDetails()"></div>
+      <div class="fixed inset-y-0 right-0 pl-10 max-w-full flex">
+        <div class="relative w-screen max-w-4xl">
+          <div class="h-full flex flex-col bg-white shadow-xl overflow-y-scroll">
+            <div class="flex-1 py-6 overflow-y-auto px-4 sm:px-6">
+              <div class="flex items-start justify-between">
+                <h2 class="text-lg font-medium text-gray-900">{{ selectedBranch.name }} Details</h2>
+                <div class="ml-3 h-7 flex items-center">
+                  <button
+                    type="button"
+                    (click)="closeBranchDetails()"
+                    class="bg-white rounded-md text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  >
+                    <span class="sr-only">Close panel</span>
+                    <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Branch Information -->
+              <div class="mt-8">
+                <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+                  <div class="px-4 py-5 sm:px-6">
+                    <h3 class="text-lg leading-6 font-medium text-gray-900">Branch Information</h3>
+                    <p class="mt-1 max-w-2xl text-sm text-gray-500">Details and performance metrics</p>
+                  </div>
+                  <div class="border-t border-gray-200">
+                    <dl>
+                      <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                        <dt class="text-sm font-medium text-gray-500">Branch Code</dt>
+                        <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{{ selectedBranch.branchCode }}</dd>
+                      </div>
+                      <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                        <dt class="text-sm font-medium text-gray-500">Address</dt>
+                        <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                          {{ selectedBranch.address }}<br>
+                          {{ selectedBranch.city }}, {{ selectedBranch.state }} {{ selectedBranch.zipCode }}
+                        </dd>
+                      </div>
+                      <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                        <dt class="text-sm font-medium text-gray-500">Contact Information</dt>
+                        <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                          <p><strong>Phone:</strong> {{ selectedBranch.phone }}</p>
+                          <p><strong>Email:</strong> {{ selectedBranch.email }}</p>
+                          <p><strong>Manager:</strong> {{ selectedBranch.manager }}</p>
+                        </dd>
+                      </div>
+                      <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                        <dt class="text-sm font-medium text-gray-500">Opening Hours</dt>
+                        <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                          <p><strong>Weekdays:</strong> {{ selectedBranch.openingHours.weekdays }}</p>
+                          <p><strong>Saturday:</strong> {{ selectedBranch.openingHours.saturday }}</p>
+                          <p><strong>Sunday:</strong> {{ selectedBranch.openingHours.sunday }}</p>
+                        </dd>
+                      </div>
+                      <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                        <dt class="text-sm font-medium text-gray-500">Services Offered</dt>
+                        <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                          <div class="flex flex-wrap gap-2">
+                            <span *ngFor="let service of selectedBranch.services" class="inline-flex items-center px-3 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                              {{ service }}
+                            </span>
+                          </div>
+                        </dd>
+                      </div>
+                      <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                        <dt class="text-sm font-medium text-gray-500">Performance Metrics</dt>
+                        <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                          <div class="grid grid-cols-2 gap-4">
+                            <div>
+                              <p class="text-gray-500">Total Customers</p>
+                              <p class="font-semibold">{{ selectedBranch.totalCustomers | number }}</p>
+                            </div>
+                            <div>
+                              <p class="text-gray-500">Total Accounts</p>
+                              <p class="font-semibold">{{ selectedBranch.totalAccounts | number }}</p>
+                            </div>
+                            <div>
+                              <p class="text-gray-500">Monthly Revenue</p>
+                              <p class="font-semibold">{{ formatCurrency(selectedBranch.monthlyRevenue) }}</p>
+                            </div>
+                            <div>
+                              <p class="text-gray-500">Growth Rate</p>
+                              <p class="font-semibold" [ngClass]="selectedBranch.monthlyGrowth >= 0 ? 'text-green-600' : 'text-red-600'">
+                                {{ selectedBranch.monthlyGrowth >= 0 ? '↑' : '↓' }} {{ selectedBranch.monthlyGrowth | number:'1.1-1' }}%
+                              </p>
+                            </div>
+                          </div>
+                        </dd>
+                      </div>
+                      <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                        <dt class="text-sm font-medium text-gray-500">Additional Information</dt>
+                        <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                          <p><strong>Established:</strong> {{ formatDate(selectedBranch.established) }}</p>
+                          <p><strong>Last Audit:</strong> {{ selectedBranch.lastAudit ? formatDate(selectedBranch.lastAudit) : 'Not audited yet' }}</p>
+                          <p><strong>Security Level:</strong> 
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ getSecurityLevelColor(selectedBranch.securityLevel) }}">
+                              {{ getSecurityLevelLabel(selectedBranch.securityLevel) }}
+                            </span>
+                          </p>
+                          <p><strong>Status:</strong> 
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ getStatusColor(selectedBranch.status) }}">
+                              {{ getStatusLabel(selectedBranch.status) }}
+                            </span>
+                          </p>
+                        </dd>
+                      </div>
+                    </dl>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Employees Section -->
+              <div class="mt-8">
+                <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">Branch Employees ({{ selectedBranchEmployees.length }})</h3>
+                <div class="bg-white shadow overflow-hidden sm:rounded-md">
+                  <ul class="divide-y divide-gray-200">
+                    <li *ngFor="let employee of selectedBranchEmployees">
+                      <div class="px-4 py-4 sm:px-6">
+                        <div class="flex items-center justify-between">
+                          <div class="flex items-center">
+                            <div class="flex-shrink-0 h-10 w-10 bg-gray-200 rounded-full flex items-center justify-center">
+                              <span class="text-gray-600 font-medium">{{ employee.name.charAt(0) }}</span>
+                            </div>
+                            <div class="ml-4">
+                              <div class="text-sm font-medium text-gray-900">{{ employee.name }}</div>
+                              <div class="text-sm text-gray-500">{{ employee.role }} • {{ employee.department }}</div>
+                            </div>
+                          </div>
+                          <div class="ml-2 flex-shrink-0 flex">
+                            <span [ngClass]="{
+                              'bg-green-100 text-green-800': employee.status === 'active',
+                              'bg-yellow-100 text-yellow-800': employee.status === 'on_leave',
+                              'bg-blue-100 text-blue-800': employee.status === 'training'
+                            }" class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full">
+                              {{ employee.status === 'active' ? 'Active' : employee.status === 'on_leave' ? 'On Leave' : 'Training' }}
+                            </span>
+                          </div>
+                        </div>
+                        <div class="mt-2 sm:flex sm:justify-between">
+                          <div class="sm:flex">
+                            <div class="mr-6 flex items-center text-sm text-gray-500">
+                              <svg class="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
+                                <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
+                              </svg>
+                              {{ employee.email }}
+                            </div>
+                            <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
+                              <svg class="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
+                              </svg>
+                              {{ employee.phone }}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- New Branch Form Modal -->
+  <div *ngIf="showNewBranchForm" class="fixed z-10 inset-0 overflow-y-auto">
+    <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+      <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" (click)="showNewBranchForm = false"></div>
+      <span class="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
+      <div class="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full sm:p-6">
+        <div>
+          <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+            <h3 class="text-lg leading-6 font-medium text-gray-900">Add New Branch</h3>
+            <div class="mt-6 grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-2">
+              <div class="sm:col-span-2">
+                <label for="name" class="block text-sm font-medium text-gray-700">Branch Name *</label>
+                <input type="text" [(ngModel)]="newBranch.name" id="name" class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
+              </div>
+              
+              <div>
+                <label for="branchCode" class="block text-sm font-medium text-gray-700">Branch Code *</label>
+                <input type="text" [(ngModel)]="newBranch.branchCode" id="branchCode" class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
+              </div>
+              
+              <div>
+                <label for="managerId" class="block text-sm font-medium text-gray-700">Manager</label>
+                <select [(ngModel)]="newBranch.managerId" id="managerId" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+                  <option value="">Select Manager</option>
+                  <option *ngFor="let manager of managers" [value]="manager.id">{{ manager.name }}</option>
+                </select>
+              </div>
+              
+              <div class="sm:col-span-2">
+                <label for="address" class="block text-sm font-medium text-gray-700">Address *</label>
+                <input type="text" [(ngModel)]="newBranch.address" id="address" class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
+              </div>
+              
+              <div>
+                <label for="city" class="block text-sm font-medium text-gray-700">City *</label>
+                <input type="text" [(ngModel)]="newBranch.city" id="city" class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
+              </div>
+              
+              <div>
+                <label for="state" class="block text-sm font-medium text-gray-700">State *</label>
+                <select [(ngModel)]="newBranch.state" id="state" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+                  <option *ngFor="let state of states.slice(1)" [value]="state">{{ state }}</option>
+                </select>
+              </div>
+              
+              <div>
+                <label for="status" class="block text-sm font-medium text-gray-700">Status</label>
+                <select [(ngModel)]="newBranch.status" id="status" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+                  <option *ngFor="let status of statuses" [value]="status.value">{{ status.label }}</option>
+                </select>
+              </div>
+              
+              <div>
+                <label for="securityLevel" class="block text-sm font-medium text-gray-700">Security Level</label>
+                <select [(ngModel)]="newBranch.securityLevel" id="securityLevel" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+                  <option *ngFor="let level of securityLevels" [value]="level.value">{{ level.label }}</option>
+                </select>
+              </div>
+              
+              <div class="sm:col-span-2">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Services Offered</label>
+                <div class="grid grid-cols-2 gap-2">
+                  <div *ngFor="let service of availableServices" class="flex items-center">
+                    <input type="checkbox" [checked]="(newBranch.services || []).includes(service)" (change)="toggleService(service)" class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                    <label class="ml-2 text-sm text-gray-700">{{ service }}</label>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse">
+          <button type="button" (click)="addBranch()" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:ml-3 sm:w-auto sm:text-sm">
+            Add Branch
+          </button>
+          <button type="button" (click)="showNewBranchForm = false" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:w-auto sm:text-sm">
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Branch Form Modal -->
+  <div *ngIf="editingBranch" class="fixed z-10 inset-0 overflow-y-auto">
+    <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+      <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" (click)="cancelEdit()"></div>
+      <span class="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
+      <div class="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full sm:p-6">
+        <div>
+          <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+            <h3 class="text-lg leading-6 font-medium text-gray-900">Edit Branch: {{ editingBranch.name }}</h3>
+            <div class="mt-6 grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-2">
+              <div class="sm:col-span-2">
+                <label for="edit-name" class="block text-sm font-medium text-gray-700">Branch Name</label>
+                <input type="text" [(ngModel)]="editingBranch.name" id="edit-name" class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
+              </div>
+              
+              <div>
+                <label for="edit-branchCode" class="block text-sm font-medium text-gray-700">Branch Code</label>
+                <input type="text" [(ngModel)]="editingBranch.branchCode" id="edit-branchCode" class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
+              </div>
+              
+              <div>
+                <label for="edit-status" class="block text-sm font-medium text-gray-700">Status</label>
+                <select [(ngModel)]="editingBranch.status" id="edit-status" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+                  <option *ngFor="let status of statuses" [value]="status.value">{{ status.label }}</option>
+                </select>
+              </div>
+              
+              <div class="sm:col-span-2">
+                <label for="edit-address" class="block text-sm font-medium text-gray-700">Address</label>
+                <input type="text" [(ngModel)]="editingBranch.address" id="edit-address" class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
+              </div>
+              
+              <div>
+                <label for="edit-phone" class="block text-sm font-medium text-gray-700">Phone</label>
+                <input type="tel" [(ngModel)]="editingBranch.phone" id="edit-phone" class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
+              </div>
+              
+              <div>
+                <label for="edit-email" class="block text-sm font-medium text-gray-700">Email</label>
+                <input type="email" [(ngModel)]="editingBranch.email" id="edit-email" class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
+              </div>
+              
+              <div>
+                <label for="edit-totalCustomers" class="block text-sm font-medium text-gray-700">Total Customers</label>
+                <input type="number" [(ngModel)]="editingBranch.totalCustomers" id="edit-totalCustomers" class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
+              </div>
+              
+              <div>
+                <label for="edit-monthlyRevenue" class="block text-sm font-medium text-gray-700">Monthly Revenue</label>
+                <input type="number" [(ngModel)]="editingBranch.monthlyRevenue" id="edit-monthlyRevenue" class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
+              </div>
+              
+              <div class="sm:col-span-2">
+                <label for="edit-services" class="block text-sm font-medium text-gray-700 mb-2">Services</label>
+                <div class="grid grid-cols-2 gap-2">
+                  <div *ngFor="let service of availableServices" class="flex items-center">
+                    <input type="checkbox" [checked]="editingBranch.services.includes(service)" (change)="toggleServiceEdit(service)" class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                    <label class="ml-2 text-sm text-gray-700">{{ service }}</label>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse">
+          <button type="button" (click)="updateBranch()" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-green-600 text-base font-medium text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 sm:ml-3 sm:w-auto sm:text-sm">
+            Update Branch
+          </button>
+          <button type="button" (click)="cancelEdit()" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:w-auto sm:text-sm">
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

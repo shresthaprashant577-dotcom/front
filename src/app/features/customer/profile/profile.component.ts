@@ -2,7 +2,7 @@ import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DashboardLayoutComponent } from '../../../shared/layouts/dashboard-layout/dashboard-layout.component';
-import { MockAuthService } from '../../../core/services/implementations/mock-auth.service';
+import { AuthService } from '../../../core/services/implementations/auth.service';
 import { User } from '../../../core/models/user.model';
 
 @Component({
@@ -16,7 +16,7 @@ import { User } from '../../../core/models/user.model';
   templateUrl: './profile.component.html',
 })
 export class ProfileComponent implements OnInit {
-  private authService = inject(MockAuthService);
+  private authService = inject(AuthService);
   
   currentUser = signal<User | null>(null);
   isEditing = signal(false);
@@ -30,9 +30,6 @@ export class ProfileComponent implements OnInit {
     email: '',
     phoneNumber: '',
     address: '',
-    city: '',
-    state: '',
-    zipCode: '',
     dateOfBirth: ''
   });
   
@@ -42,24 +39,20 @@ export class ProfileComponent implements OnInit {
   
   loadProfile() {
     this.isLoading.set(true);
-    
-    this.authService.getCurrentUser().subscribe(user => {
-      this.currentUser.set(user);
-      if (user) {
-        this.profileData.set({
-          firstName: user.firstName,
-          lastName: user.lastName,
-          email: user.email,
-          phoneNumber: user.phoneNumber,
-          address: user.address,
-          city: user.city,
-          state: user.state,
-          zipCode: user.zipCode,
-          dateOfBirth: user.dateOfBirth.toISOString().split('T')[0]
-        });
-      }
-      this.isLoading.set(false);
-    });
+
+    const user = this.authService.getCurrentUser();
+    this.currentUser.set(user);
+    if (user) {
+      this.profileData.set({
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        phoneNumber: user.phoneNumber,
+        address: user.address,
+        dateOfBirth: user.dateOfBirth.toISOString().split('T')[0]
+      });
+    }
+    this.isLoading.set(false);
   }
   
   startEditing() {
@@ -76,8 +69,8 @@ saveProfile() {
 
   // In real app, this would update via API
   setTimeout(() => {
-    this.authService.updateProfile(payload).subscribe({
-      next: (updatedUser) => {
+    this.authService.updateUserProfile(payload).subscribe({
+      next: (updatedUser: User) => {
         this.currentUser.set(updatedUser);
         this.isEditing.set(false);
         this.isSaving.set(false);

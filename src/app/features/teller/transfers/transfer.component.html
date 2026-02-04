@@ -1,0 +1,353 @@
+<app-dashboard-layout>
+  <div class="max-w-6xl mx-auto p-6">
+    <!-- Header -->
+    <div class="mb-8">
+      <h1 class="text-3xl font-bold text-gray-800 flex items-center gap-3">
+        <svg class="w-8 h-8 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M21 12.79V9c0-1.1-.9-2-2-2h-4V5c0-1.1-.9-2-2-2H3c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2v-1h4c1.1 0 2-.9 2-2v-3.79c0-.39-.23-.74-.59-.91l-5-2.5c-.36-.18-.81-.18-1.17.01l-5 2.5c-.36.17-.59.52-.59.91V18c0 .55.45 1 1 1h4c.55 0 1-.45 1-1v-3.79c0-.39.23-.74.59-.91l5-2.5c.36-.18.81-.18 1.17.01l5 2.5c.36.17.59.52.59.91z"/>
+        </svg>
+        Process Transfer
+      </h1>
+      <p class="text-gray-600 mt-2">Transfer funds between accounts for customers</p>
+    </div>
+
+    <!-- Transfer Type Selector -->
+    <div class="mb-8">
+      <div class="flex space-x-4">
+        <button type="button"
+                [class]="transferType() === 'internal' ? 
+                        'bg-blue-600 text-white' : 
+                        'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'"
+                class="flex-1 py-3 px-4 rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
+                (click)="transferType.set('internal')">
+          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M16 17.01V10h-2v7.01h-3L15 21l4-3.99h-3zM9 3L5 6.99h3V14h2V6.99h3L9 3z"/>
+          </svg>
+          Internal Transfer
+        </button>
+        
+        <button type="button"
+                [class]="transferType() === 'external' ? 
+                        'bg-blue-600 text-white' : 
+                        'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'"
+                class="flex-1 py-3 px-4 rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
+                (click)="transferType.set('external')">
+          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+          </svg>
+          External Transfer
+        </button>
+      </div>
+    </div>
+
+    <!-- Transfer Form -->
+    <div class="bg-white rounded-xl shadow-md p-6">
+      <div class="mb-6">
+        <h2 class="text-xl font-semibold text-gray-800 mb-2">
+          {{ transferType() === 'internal' ? 'Internal Transfer' : 'External Transfer' }}
+        </h2>
+        <p class="text-gray-600">
+          {{ transferType() === 'internal' ? 
+             'Transfer between accounts within our bank' : 
+             'Transfer to accounts in other banks' }}
+        </p>
+      </div>
+
+      <form (ngSubmit)="processTransfer()">
+        <!-- From Account -->
+        <div class="mb-6">
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            <span class="flex items-center gap-1">
+              <svg class="w-4 h-4 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
+              </svg>
+              From Account *
+            </span>
+          </label>
+          <select [(ngModel)]="transferData().fromAccount"
+                  name="fromAccount"
+                  required
+                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
+            <option value="" disabled selected>Select source account</option>
+            <option value="checking-001">Checking •••• 1234 ($5,432.10)</option>
+            <option value="savings-001">Savings •••• 5678 ($12,345.67)</option>
+            <option value="business-001">Business •••• 9012 ($23,456.78)</option>
+          </select>
+          <div class="mt-2 text-sm text-gray-500">
+            Available balance: ${{ transferData().fromAccount.includes('checking') ? '5,432.10' : 
+                                 transferData().fromAccount.includes('savings') ? '12,345.67' : 
+                                 transferData().fromAccount.includes('business') ? '23,456.78' : '0.00' }}
+          </div>
+        </div>
+
+        <!-- To Account -->
+        <div class="mb-6">
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            <span class="flex items-center gap-1">
+              <svg class="w-4 h-4 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
+              </svg>
+              To Account *
+            </span>
+          </label>
+          
+          <div *ngIf="transferType() === 'internal'" class="space-y-4">
+            <select [(ngModel)]="transferData().toAccount"
+                    name="toAccount"
+                    required
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
+              <option value="" disabled selected>Select destination account</option>
+              <option value="john-doe-checking">John Doe •••• 4321 (Checking)</option>
+              <option value="jane-smith-savings">Jane Smith •••• 8765 (Savings)</option>
+              <option value="acme-corp-business">Acme Corp •••• 2109 (Business)</option>
+            </select>
+          </div>
+
+          <div *ngIf="transferType() === 'external'" class="space-y-4">
+            <!-- Bank Name -->
+            <div>
+              <input type="text"
+                     [(ngModel)]="transferData().toBank"
+                     name="toBank"
+                     required
+                     placeholder="Bank Name"
+                     class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
+            </div>
+
+            <!-- Account Number -->
+            <div>
+              <input type="text"
+                     [(ngModel)]="transferData().toAccount"
+                     name="toAccount"
+                     required
+                     placeholder="Account Number"
+                     class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
+            </div>
+
+            <!-- Routing Number -->
+            <div>
+              <input type="text"
+                     [(ngModel)]="transferData().routingNumber"
+                     name="routingNumber"
+                     required
+                     placeholder="Routing Number"
+                     class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
+            </div>
+          </div>
+        </div>
+
+        <!-- Transfer Amount -->
+        <div class="mb-6">
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            <span class="flex items-center gap-1">
+              <svg class="w-4 h-4 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM7 9a1 1 0 000 2h6a1 1 0 100-2H7z" clip-rule="evenodd"/>
+              </svg>
+              Amount *
+            </span>
+          </label>
+          <div class="relative">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <span class="text-gray-500">$</span>
+            </div>
+            <input type="number"
+                   [(ngModel)]="transferData().amount"
+                   name="amount"
+                   required
+                   min="1"
+                   step="0.01"
+                   placeholder="0.00"
+                   class="w-full pl-8 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
+          </div>
+          <div class="mt-2 flex items-center text-sm text-gray-500">
+            <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+            </svg>
+            Transfer fee: {{ transferType() === 'internal' ? 'Free' : '$25.00' }}
+          </div>
+        </div>
+
+        <!-- Description -->
+        <div class="mb-6">
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            <span class="flex items-center gap-1">
+              <svg class="w-4 h-4 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M18 13V5a2 2 0 00-2-2H4a2 2 0 00-2 2v8a2 2 0 002 2h3l3 3 3-3h3a2 2 0 002-2zM5 7a1 1 0 011-1h8a1 1 0 110 2H6a1 1 0 01-1-1zm1 3a1 1 0 100 2h3a1 1 0 100-2H6z" clip-rule="evenodd"/>
+              </svg>
+              Description (Optional)
+            </span>
+          </label>
+          <textarea [(ngModel)]="transferData().description"
+                    name="description"
+                    rows="3"
+                    placeholder="Add a note for this transfer"
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"></textarea>
+        </div>
+
+        <!-- Customer Verification -->
+        <div class="mb-8 p-4 bg-gray-50 rounded-lg">
+          <div class="flex items-start gap-3">
+            <input type="checkbox"
+                   id="customerVerified"
+                   [(ngModel)]="transferData().customerVerified"
+                   name="customerVerified"
+                   required
+                   class="h-5 w-5 text-blue-600 mt-1">
+            <div>
+              <label for="customerVerified" class="text-sm font-medium text-gray-700">
+                Customer Identity Verified
+              </label>
+              <p class="text-sm text-gray-500 mt-1">
+                I confirm that I have verified the customer's identity and they have authorized this transfer.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Transfer Summary -->
+        <div class="mb-8 border rounded-lg p-4">
+          <h3 class="font-semibold text-gray-800 mb-4 flex items-center gap-2">
+            <svg class="w-5 h-5 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M5 2a2 2 0 00-2 2v14l3.5-2 3.5 2 3.5-2 3.5 2V4a2 2 0 00-2-2H5zm4.707 3.707a1 1 0 00-1.414-1.414l-3 3a1 1 0 000 1.414l3 3a1 1 0 001.414-1.414L8.414 9H10a3 3 0 013 3v1a1 1 0 102 0v-1a5 5 0 00-5-5H8.414l1.293-1.293z" clip-rule="evenodd"/>
+            </svg>
+            Transfer Summary
+          </h3>
+          <div class="space-y-2">
+            <div class="flex justify-between">
+              <span class="text-gray-600">Transfer Type:</span>
+              <span class="font-medium">{{ transferType() === 'internal' ? 'Internal' : 'External' }}</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-gray-600">Amount:</span>
+              <span class="font-medium">{{ transferData().amount ? ('$' + transferData().amount) : '$0.00' }}</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-gray-600">Fee:</span>
+              <span class="font-medium">{{ transferType() === 'internal' ? 'Free' : '$25.00' }}</span>
+            </div>
+    <div *ngIf="transferData().amount" class="flex justify-between border-t pt-2">
+  <span class="text-gray-800 font-semibold">Total:</span>
+  <span class="text-gray-800 font-bold">
+    {{ '$' + totalAmount().toFixed(2) }}
+  </span>
+</div>
+
+          </div>
+        </div>
+
+        <!-- Submit Button -->
+        <div class="flex justify-end">
+          <button type="submit"
+                  [disabled]="isLoading()"
+                  class="px-8 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
+            <svg *ngIf="isLoading()" class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            {{ isLoading() ? 'Processing...' : 'Process Transfer' }}
+          </button>
+        </div>
+      </form>
+
+      <!-- Recent Transfers -->
+      <div class="mt-12 pt-8 border-t">
+        <h3 class="text-lg font-semibold text-gray-800 mb-4">Recent Transfers</h3>
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+              <tr>
+                <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">From</th>
+                <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">To</th>
+                <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+                <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+              </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+              <tr>
+                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">Today, 10:30 AM</td>
+                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">•••• 1234</td>
+                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">•••• 4321</td>
+                <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-green-600">$500.00</td>
+                <td class="px-4 py-3 whitespace-nowrap">
+                  <span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800 font-medium">Completed</span>
+                </td>
+              </tr>
+              <tr>
+                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">Yesterday, 2:15 PM</td>
+                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">•••• 5678</td>
+                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">Chase Bank</td>
+                <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-blue-600">$1,200.00</td>
+                <td class="px-4 py-3 whitespace-nowrap">
+                  <span class="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800 font-medium">Processing</span>
+                </td>
+              </tr>
+              <tr>
+                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">Dec 15, 9:45 AM</td>
+                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">•••• 9012</td>
+                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">•••• 8765</td>
+                <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-green-600">$250.00</td>
+                <td class="px-4 py-3 whitespace-nowrap">
+                  <span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800 font-medium">Completed</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Help Information -->
+    <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div class="bg-blue-50 rounded-lg p-4">
+        <div class="flex items-center gap-3 mb-3">
+          <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+            <svg class="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+            </svg>
+          </div>
+          <h4 class="font-semibold text-gray-800">Transfer Limits</h4>
+        </div>
+        <p class="text-sm text-gray-600">
+          Internal transfers: $50,000 daily limit<br>
+          External transfers: $10,000 daily limit<br>
+          Transfers process within 1-2 business days
+        </p>
+      </div>
+
+      <div class="bg-green-50 rounded-lg p-4">
+        <div class="flex items-center gap-3 mb-3">
+          <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+            <svg class="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L9 10.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+            </svg>
+          </div>
+          <h4 class="font-semibold text-gray-800">Security Features</h4>
+        </div>
+        <p class="text-sm text-gray-600">
+          Always verify customer identity<br>
+          Double-check account numbers<br>
+          Keep transfer receipts for records<br>
+          Report suspicious activity
+        </p>
+      </div>
+
+      <div class="bg-purple-50 rounded-lg p-4">
+        <div class="flex items-center gap-3 mb-3">
+          <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
+            <svg class="w-5 h-5 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M5 2a2 2 0 00-2 2v14l3.5-2 3.5 2 3.5-2 3.5 2V4a2 2 0 00-2-2H5zm4.707 3.707a1 1 0 00-1.414-1.414l-3 3a1 1 0 000 1.414l3 3a1 1 0 001.414-1.414L8.414 9H10a3 3 0 013 3v1a1 1 0 102 0v-1a5 5 0 00-5-5H8.414l1.293-1.293z" clip-rule="evenodd"/>
+            </svg>
+          </div>
+          <h4 class="font-semibold text-gray-800">Processing Times</h4>
+        </div>
+        <p class="text-sm text-gray-600">
+          Internal transfers: Instant<br>
+          External transfers: 1-3 business days<br>
+          Cut-off time: 4:00 PM EST<br>
+          Holiday schedules apply
+        </p>
+      </div>
+    </div>
+  </div>
+</app-dashboard-layout>
